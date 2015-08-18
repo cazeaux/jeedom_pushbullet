@@ -504,8 +504,6 @@ class pushbullet extends eqLogic {
     public function runDeamon() {
         $daemon_path = realpath(dirname(__FILE__) . '/../../ressources/pushbullet_daemon');
 
-        $config = template_replace($replace_config, $config);
-
         $cmd = 'nice -n 19 /usr/bin/python ' . $daemon_path . '/pushbullet.py '.$this->getConfiguration('token');
 
         $result = exec('nohup ' . $cmd . ' > /dev/null 2>&1 &');
@@ -541,7 +539,7 @@ class pushbullet extends eqLogic {
             return false;
         }
         $result = exec('cat /proc/' . $pid . '/cmdline | grep "pushbullet" | wc -l', $output, $retcode);
-        if ($retcode == 0 && $result == 0 && file_exists($pid_file)) {
+        if (($retcode == 0 && $result == 0 && file_exists($pid_file) ) || $retcode != 0) {
             unlink($pid_file);
             return false;
         }
