@@ -312,6 +312,9 @@ class pushbullet extends eqLogic {
 
 					// si push désactivé, on supprime le device
 				}
+				
+				$this->setConfiguration('pushdeviceid', $deviceEntry["deviceid"]);
+
 			}
 			
 			$arrayExistingCmd[$deviceEntry["deviceid"]] = -1;
@@ -598,7 +601,7 @@ class pushbulletCmd extends cmd {
 				$_options['title'] = __('[Jeedom] - Notification', __FILE__);
 			}
 			// prepare data
-			$arrayData = array("type" => "note", "title" => $_options['title'], "body" => $_options['message'], "source_device_iden" => $this->getConfiguration('deviceid'));
+			$arrayData = array("type" => "note", "title" => $_options['title'], "body" => $_options['message'], "source_device_iden" => $eqLogic_pushbullet->getConfiguration('pushdeviceid'));
 
 			/*if ($this->getConfiguration('deviceid') != 'all') {
 				$arrayPushDevices = array($this->getConfiguration('deviceid'));
