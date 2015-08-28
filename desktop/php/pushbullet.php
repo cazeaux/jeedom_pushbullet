@@ -109,20 +109,17 @@ $eqLogics = eqLogic::byType('pushbullet')
                         <input type="checkbox" class="eqLogicAttr bootstrapSwitch" data-label-text="{{Activé}}" data-l1key="configuration" data-l2key="dismissInitialCommandeInReply" />
                     </div>
                 </div>
-               <div class="form-group">
-                    <label class="col-sm-3 control-label">{{Timestamp}}</label>
-                    <div class="col-sm-9">
-                        <input type="text" class="eqLogicAttr configuration form-control" data-l1key="configuration" data-l2key="timestamp" readonly="true" placeholder="timestamp du dernier push reçu"/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">{{Dernière valeur push}}</label>
-                    <div class="col-sm-9">
-                        <input type="text" class="eqLogicAttr configuration form-control" data-l1key="configuration" data-l2key="lastvalue" readonly="true" placeholder="valeur du dernier push reçu"/>
-                    </div>
-                </div>
             </fieldset> 
         </form>
+        <legend>{{Dernière commande reçue}}</legend>
+		<p>
+			<label class="col-sm-3 control-label">{{Timestamp}}</label>
+			<span class="eqLogicAttr" data-l1key="configuration" data-l2key="timestamp" readonly="true" placeholder="timestamp du dernier push reçu"/>
+		</p>
+		<p>
+			<label class="col-sm-3 control-label">{{Dernière valeur push}}</label>
+			<span class="eqLogicAttr" data-l1key="configuration" data-l2key="lastvalue" readonly="true" placeholder="valeur du dernier push reçu"/>
+		</p>
 
         <legend>{{PushBullet}}</legend>
         <div class="alert alert-info">
