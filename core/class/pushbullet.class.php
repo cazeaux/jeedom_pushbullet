@@ -618,18 +618,10 @@ class pushbulletCmd extends cmd {
 			curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 			
 			if ($this->getConfiguration('deviceid') != 'all') {
-					curl_setopt($curl, CURLOPT_POSTFIELDS, $arrayData);
-					curl_exec($curl);
+					$arrayData["device_iden"] = $this->getConfiguration('deviceid');
 			}
-			else {
-				$arrayPushDevices = explode(',', $this->getConfiguration('pushdeviceids'));
-				foreach ($arrayPushDevices as $device) {
-					$arrayData["device_iden"] = $device;
-					curl_setopt($curl, CURLOPT_POSTFIELDS, $arrayData);
-					
-					curl_exec($curl);
-				}
-			}
+			curl_setopt($curl, CURLOPT_POSTFIELDS, $arrayData);
+			curl_exec($curl);
 			
 			curl_close($curl);
 		}
