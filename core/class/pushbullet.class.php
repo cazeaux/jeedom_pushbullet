@@ -150,7 +150,14 @@ class pushbullet extends eqLogic {
 									}
 									
 									foreach ($this->getCmd() as $cmd_response) {
-										if((!$this->getConfiguration('sendBackReponseToSource') && $cmd_response->getConfiguration('isResponseDevice')) || ($this->getConfiguration('sendBackReponseToSource') && $cmd_response->getConfiguration('deviceid') == $event['source'])) {
+										// 3 cas possibles ici, dans l'ordre:
+										// 1: pas d'envoi de la réponse à la source de la commande, donc on envoie aux devices sélectionnés
+										// 2: envoi de la réponse à la source de la commande, et on trouve le device source
+										// 3: envoi de la réponse à la source de la commande, on ne trouve pas le device source donc on envoie aux devices sélectionnés
+										
+										if(    (!$this->getConfiguration('sendBackReponseToSource') && $cmd_response->getConfiguration('isResponseDevice'))
+											|| ($this->getConfiguration('sendBackReponseToSource') && $cmd_response->getConfiguration('deviceid') == $event['source'])
+											|| ($this->getConfiguration('sendBackReponseToSource') && !$cmd_response->getConfiguration('deviceid') $cmd_response->getConfiguration('isResponseDevice'))) {
 											$cmd_response->execute(array('title' => $reply, 'message' => $messageBody));
 										}
 									}
