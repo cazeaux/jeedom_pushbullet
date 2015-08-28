@@ -92,6 +92,12 @@ $eqLogics = eqLogic::byType('pushbullet')
                     </div>
                 </div>
                 <div class="form-group">
+                    <label class="col-sm-3 control-label">{{Envoyer la réponses des interactions au device qui a émis la commande (si activé, ce paramètre se substitue au choix fait au niveau de chaque device)}}</label>
+                    <div class="col-sm-9">
+                        <input type="checkbox" class="eqLogicAttr bootstrapSwitch" data-label-text="{{Activé}}" data-l1key="configuration" data-l2key="sendBackReponseToSource" checked/>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label class="col-sm-3 control-label">{{Activer les interactions sur cet équipement}}</label>
                     <div class="col-sm-9">
                         <input type="checkbox" class="eqLogicAttr bootstrapSwitch" data-label-text="{{Activé}}" data-l1key="configuration" data-l2key="isInteractionEnabled" checked/>
