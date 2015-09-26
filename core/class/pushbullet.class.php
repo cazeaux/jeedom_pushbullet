@@ -389,6 +389,10 @@ class pushbullet extends eqLogic {
 			if ($arrayExistingCmd[$cmd->GetConfiguration('deviceid')] == 1 && $cmd->GetConfiguration('deviceid') != 'all' && $cmd->GetConfiguration('deviceid') != $jeedomDeviceId) {
 				$cmd->remove();
 			}
+			else if ($cmd->GetConfiguration('deviceid') == $jeedomDeviceId)	{
+				$cmd->setName(__($jeedomDeviceName, __FILE__));
+				$cmd->save();
+			}
 			else if ($cmd->getConfiguration('deviceid') == 'all') {
 				$cmd->setConfiguration('pushdeviceids', implode(",", $arrayAllDevices));
 				$cmd->save();
