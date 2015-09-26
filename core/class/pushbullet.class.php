@@ -394,7 +394,6 @@ class pushbullet extends eqLogic {
 				$cmd->save();
 			}
 		}
-		$this->save();
 	}
 	
     public function getDevices() {
