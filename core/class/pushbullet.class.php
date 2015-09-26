@@ -271,13 +271,11 @@ class pushbullet extends eqLogic {
 		$bCreatePushDevice = true;
 		$bIsPushEnabled = $this->getConfiguration('isPushEnabled');
 		$jeedomDeviceName = $this->getConfiguration('jeedomDeviceName');
-		$jeedomDeviceId = $this->getConfiguration('pushdeviceid');
 		$this->myLog('name : '.$jeedomDeviceName);
 		$this->myLog('id : '.$jeedomDeviceId);
 		
 		if (!$jeedomDeviceName) {
 			$jeedomDeviceName = 'jeedom_'.$this->id;
-			$this->setConfiguration('jeedomDeviceName', $jeedomDeviceName);
 		}
 	
 		
@@ -285,7 +283,12 @@ class pushbullet extends eqLogic {
 		$arrayEquipmentCmd = $this->getCmd();
 		foreach ($arrayEquipmentCmd as $cmd) {
 			$arrayExistingCmd[$cmd->GetConfiguration('deviceid')] = 1;
+			if ($cmd->GetConfiguration('isPushChannel')) {
+				$jeedomDeviceId = $cmd->getConfiguration('deviceid');
+			}
 		}
+		
+		// A ce stade on a le jeedomDeviceName (ou celui par défaut si non défini) et le jeedomDeviceId s'il est déjà connu
 
 		// On récupère les devices créés sur PUSHBULLET
 		$arrayDevices = $this->GetDevices();
@@ -328,8 +331,6 @@ class pushbullet extends eqLogic {
 					// si push désactivé, on supprime le device
 				}
 				
-				$this->setConfiguration('pushdeviceid', $deviceEntry["deviceid"]);
-
 			}
 			
 			$arrayExistingCmd[$deviceEntry["deviceid"]] = -1;
@@ -342,7 +343,6 @@ class pushbullet extends eqLogic {
 				$jeedomDevice = $this->createJeedomDevice($jeedomDeviceName);
 				$jeedomDeviceId = $jeedomDevice["deviceid"];
 				$deviceTimestamp = $jeedomDevice["timestamp"];
-				$this->setConfiguration('pushdeviceid', $jeedomDeviceId);
 			}
 			else {
 				$jeedomDeviceId = $jeedomDeviceExitsAtPushbullet["deviceid"];
@@ -364,8 +364,8 @@ class pushbullet extends eqLogic {
 			//$this->setLastTimestamp($deviceTimestamp);
 			
 		}
-		else if ($bIsPushEnabled) {
-			$this->updateJeedomDevice($jeedomDeviceExitsAtPushbullet["deviceid"], $jeedomDeviceName);
+		else if ($bIsPushEnabled && $jeedomDeviceId) {
+			$this->updateJeedomDevice($jeedomDeviceId, $jeedomDeviceName);
 		}
 
 		
