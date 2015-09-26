@@ -86,6 +86,12 @@ $eqLogics = eqLogic::byType('pushbullet')
                     </div>
                 </div>
                 <div class="form-group">
+                    <label class="col-sm-3 control-label">{{Nom du device Jeedom dans Pushbullet}}</label>
+                    <div class="col-md-3">
+                        <input type="text" class="eqLogicAttr configuration form-control" data-l1key="configuration" data-l2key="jeedomDeviceName" placeholder="jeedom device name"/>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label class="col-sm-3 control-label">{{Activer l'envoi de commandes vers jeedom via cet équipement}}</label>
                     <div class="col-sm-9">
                         <input type="checkbox" class="eqLogicAttr bootstrapSwitch" data-label-text="{{Activé}}" data-l1key="configuration" data-l2key="isPushEnabled" checked/>

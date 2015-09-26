@@ -270,7 +270,12 @@ class pushbullet extends eqLogic {
 		$jeedomDeviceExitsAtPushbullet = 0;
 		$bCreatePushDevice = true;
 		$bIsPushEnabled = $this->getConfiguration('isPushEnabled');
-		$jeedomDeviceName = 'jeedom_'.$this->id;
+		$jeedomDeviceName = $this->getConfiguration('jeedomDeviceName');
+		
+		if (!$jeedomDeviceName) {
+			$jeedomDeviceName = 'jeedom_'.$this->id;
+			$this->setConfiguration('jeedomDeviceName', $jeedomDeviceName);
+		}
 	
 		
 		// On récupère les commandes déjà créées, dans le cas d'un UPDATE. Vide s'il s'agit d'une première création
@@ -354,6 +359,9 @@ class pushbullet extends eqLogic {
 
 			//$this->setLastTimestamp($deviceTimestamp);
 			
+		}
+		else if ($bIsPushEnabled) {
+			$this->updateJeedomDevice($jeedomDeviceExitsAtPushbullet["deviceid"], $jeedomDeviceName);
 		}
 
 		
@@ -447,6 +455,34 @@ class pushbullet extends eqLogic {
 		else {
 			$return = array();
 			throw new Exception(__('Erreur Pushbullet CreateJeedomDevice : '.curl_error($curl), __FILE__));
+		}
+		curl_close($curl);
+		
+		return $return;
+    }
+
+	public function updateJeedomDevice($deviceId, $jeedomDeviceName) {
+		
+		$arrayData = array('nickname' => $jeedomDeviceName);
+		
+		// sendRequest 
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, PUSHBULLETURLDEVICES.'/'.$deviceId);
+		curl_setopt($curl, CURLOPT_POST, true);
+		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_USERPWD, $this->getConfiguration('token') . ":");
+		curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+		curl_setopt($curl, CURLOPT_POSTFIELDS, $arrayData);
+		
+		$curlData = json_decode(curl_exec($curl), true);
+		if ($curlData) {
+			$return = array("deviceid" => $curlData["iden"], "timestamp" => $curlData["modified"]);
+		}
+		else {
+			$return = array();
+			throw new Exception(__('Erreur Pushbullet UpdateJeedomDevice : '.curl_error($curl), __FILE__));
 		}
 		curl_close($curl);
 		
