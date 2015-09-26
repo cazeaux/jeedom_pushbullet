@@ -132,6 +132,7 @@ class pushbullet extends eqLogic {
 						}
 						
 						if ($sendEvent) {
+							$this->myLog('Send Event : '.$eventBody);
 							$eventBodyToSend = $eventBody;
 							/*
 							MODIFICATION TEMPORAIRE : on sauvegarde l'eventBody à déclencher. Du coup, seul le dernier sera pris en compte
@@ -143,6 +144,7 @@ class pushbullet extends eqLogic {
 							if ($this->getConfiguration('isInteractionEnabled'))
 							{
 								$reply = interactQuery::tryToReply(trim($eventBody), array());
+								$this->myLog('Interaction reply : '.$reply);
 								if (trim($reply) != '') {
 									$messageBody = '';
 									if (!$this->getConfiguration('dismissInitialCommandeInReply')) {
