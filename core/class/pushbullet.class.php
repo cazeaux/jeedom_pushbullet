@@ -29,9 +29,9 @@ define('PUSHBULLETME', 'https://api.pushbullet.com/v2/users/me');
 class pushbullet extends eqLogic {
 
 	public function mylog($txt) {
-/*		$fp = fopen('/tmp/log', 'a+');
+		$fp = fopen('/tmp/log', 'a+');
 		fputs($fp, $txt."\n");
-		fclose($fp);*/
+		fclose($fp);
 	}
 
 
@@ -272,6 +272,8 @@ class pushbullet extends eqLogic {
 		$bIsPushEnabled = $this->getConfiguration('isPushEnabled');
 		$jeedomDeviceName = $this->getConfiguration('jeedomDeviceName');
 		$jeedomDeviceId = $this->getConfiguration('pushdeviceid');
+		$this->myLog('name : '.$jeedomDeviceName);
+		$this->myLog('id : '.$jeedomDeviceId);
 		
 		if (!$jeedomDeviceName) {
 			$jeedomDeviceName = 'jeedom_'.$this->id;
@@ -392,7 +394,7 @@ class pushbullet extends eqLogic {
 				$cmd->save();
 			}
 		}
-		
+		$this->save();
 	}
 	
     public function getDevices() {
