@@ -271,6 +271,7 @@ class pushbullet extends eqLogic {
 		$bCreatePushDevice = true;
 		$bIsPushEnabled = $this->getConfiguration('isPushEnabled');
 		$jeedomDeviceName = $this->getConfiguration('jeedomDeviceName');
+		$jeedomDeviceId = $this->getConfiguration('pushdeviceid');
 		
 		if (!$jeedomDeviceName) {
 			$jeedomDeviceName = 'jeedom_'.$this->id;
@@ -295,12 +296,12 @@ class pushbullet extends eqLogic {
 			$this->mylog('loop '.$deviceEntry["deviceid"]);
 			$this->mylog('loop '.$deviceEntry["name"]);
 
-			if ($deviceEntry["name"] != $jeedomDeviceName) {
+			if ($deviceEntry["deviceid"] != $jeedomDeviceId) {
 				$arrayAllDevices[] = $deviceEntry["deviceid"];
 			}
 			
 			// Device normaux (type action)
-			if (!isset($arrayExistingCmd[$deviceEntry["deviceid"]]) && $deviceEntry["name"] != $jeedomDeviceName) {
+			if (!isset($arrayExistingCmd[$deviceEntry["deviceid"]]) && $deviceEntry["deviceid"] != $jeedomDeviceId) {
 				// On marque le device comme étant valide.
 
 				$device = new pushbulletCmd();
@@ -314,7 +315,7 @@ class pushbullet extends eqLogic {
 				$device->save();
 			}
 			// Device spécifique pour le push (type info)
-			else if ($deviceEntry["name"] == $jeedomDeviceName) {
+			else if ($deviceEntry["deviceid"] == $jeedomDeviceId) {
 
 				$jeedomDeviceExitsAtPushbullet = $deviceEntry;
 				
@@ -337,11 +338,12 @@ class pushbullet extends eqLogic {
 		if ($bCreatePushDevice && $bIsPushEnabled) {
 			if (!$jeedomDeviceExitsAtPushbullet) {
 				$jeedomDevice = $this->createJeedomDevice($jeedomDeviceName);
-				$deviceId = $jeedomDevice["deviceid"];
+				$jeedomDeviceId = $jeedomDevice["deviceid"];
 				$deviceTimestamp = $jeedomDevice["timestamp"];
+				$this->setConfiguration('pushdeviceid', $jeedomDeviceId);
 			}
 			else {
-				$deviceId = $jeedomDeviceExitsAtPushbullet["deviceid"];
+				$jeedomDeviceId = $jeedomDeviceExitsAtPushbullet["deviceid"];
 				$deviceTimestamp = 0;
 				
 			}
@@ -349,7 +351,7 @@ class pushbullet extends eqLogic {
 			$device = new pushbulletCmd();
 			$device->setName(__($jeedomDeviceName, __FILE__));
 			$device->setEqLogic_id($this->id);
-			$device->setConfiguration('deviceid', $deviceId);
+			$device->setConfiguration('deviceid', $jeedomDeviceId);
 			$device->setConfiguration('isPushChannel', '1');
 			$device->setUnite('');
 			$device->setType('info');
@@ -382,7 +384,7 @@ class pushbullet extends eqLogic {
 		
 		// On supprime les commandes en trop et on update le device ALL
 		foreach ($arrayEquipmentCmd as $cmd) {
-			if ($arrayExistingCmd[$cmd->GetConfiguration('deviceid')] == 1 && $cmd->GetConfiguration('deviceid') != 'all' && $cmd->GetName() != $jeedomDeviceName) {
+			if ($arrayExistingCmd[$cmd->GetConfiguration('deviceid')] == 1 && $cmd->GetConfiguration('deviceid') != 'all' && $cmd->GetConfiguration('deviceid') != $jeedomDeviceId) {
 				$cmd->remove();
 			}
 			else if ($cmd->getConfiguration('deviceid') == 'all') {
