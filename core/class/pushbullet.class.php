@@ -517,6 +517,15 @@ class pushbullet extends eqLogic {
 		
     }
 	
+	function getJeedomDeviceId() {
+		foreach ($this->getCmd() as $cmd) {
+			if ($cmd->getConfiguration('isPushChannel') == 1) {
+				$jeedomDeviceId = $cmd->getConfiguration('deviceid');
+			}
+		}
+		return $jeedomDeviceId;
+	}
+	
     public function testToken($token) {
 		
 		// sendRequest 
@@ -656,7 +665,11 @@ class pushbulletCmd extends cmd {
 				$_options['title'] = __('[Jeedom] - Notification', __FILE__);
 			}
 			// prepare data
-			$arrayData = array("type" => "note", "title" => $_options['title'], "body" => $_options['message'], "source_device_iden" => $eqLogic_pushbullet->getConfiguration('pushdeviceid'));
+			$arrayData = array("type" => "note", "title" => $_options['title'], "body" => $_options['message']);
+			$jeedomDeviceId = $eqLogic_pushbullet->getJeedomDeviceId();
+			if ($jeedomDeviceId) {
+				$arrayData["source_device_iden"] = $jeedomDeviceId;
+			}
 
 			/*if ($this->getConfiguration('deviceid') != 'all') {
 				$arrayPushDevices = array($this->getConfiguration('deviceid'));
