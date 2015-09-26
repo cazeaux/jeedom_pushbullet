@@ -88,7 +88,7 @@ class pushbullet extends eqLogic {
 						
 						$lines = explode("\n", $event['body']);
 						if (count($lines) > 1) {
-							$eventBody = $lines[1];
+							$eventBodies = array_slice($lines, 1);
 							$eventProgDate = $lines[0];
 						}
 						else {
@@ -107,22 +107,24 @@ class pushbullet extends eqLogic {
 							if ($command == PUSBULLET_COMMAND_RAPPEL_1 || $command == PUSBULLET_COMMAND_RAPPEL_2) {
 								$timestamp = strtotime($matches[2]);
 								if ($timestamp && $timestamp - date() > 60) {
-									$arrayCronOptions = array('pushbullet_id' => intval($this->getId()), 'cron_id' => time(), 'body' => $eventBody, 'source' => $event['source']);
-									$cron = cron::byClassAndFunction('pushbullet', 'activateReminder', $arrayCronOptions);
+									foreach ($eventBodies as $eventBody) {
+										$arrayCronOptions = array('pushbullet_id' => intval($this->getId()), 'cron_id' => time(), 'body' => $eventBody, 'source' => $event['source']);
+										$cron = cron::byClassAndFunction('pushbullet', 'activateReminder', $arrayCronOptions);
 
-									if (!is_object($cron)) {
-										$cron = new cron();
-										$cron->setClass('pushbullet');
-										$cron->setFunction('activateReminder');
-										$cron->setOption($arrayCronOptions);
-										$cron->setOnce(1);
+										if (!is_object($cron)) {
+											$cron = new cron();
+											$cron->setClass('pushbullet');
+											$cron->setFunction('activateReminder');
+											$cron->setOption($arrayCronOptions);
+											$cron->setOnce(1);
+										}
+
+										$cronDate = date('i', $timestamp) . ' ' . date('H', $timestamp) . ' ' . date('d', $timestamp) . ' ' . date('m', $timestamp) . ' * ' . date('Y', $timestamp);
+										$this->myLog('crontDate '.$cronDate);
+
+										$cron->setSchedule($cronDate);
+										$cron->save();
 									}
-
-									$cronDate = date('i', $timestamp) . ' ' . date('H', $timestamp) . ' ' . date('d', $timestamp) . ' ' . date('m', $timestamp) . ' * ' . date('Y', $timestamp);
-									$this->myLog('crontDate '.$cronDate);
-
-									$cron->setSchedule($cronDate);
-									$cron->save();
 									$sendEvent = false;
 								} else {
 									$this->myLog('Reminder failed ');
