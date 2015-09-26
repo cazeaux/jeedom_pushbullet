@@ -160,6 +160,7 @@ class pushbullet extends eqLogic {
 										if(    (!$this->getConfiguration('sendBackReponseToSource') && $cmd_response->getConfiguration('isResponseDevice'))
 											|| ($this->getConfiguration('sendBackReponseToSource') && $cmd_response->getConfiguration('deviceid') == $event['source'])
 											|| ($this->getConfiguration('sendBackReponseToSource') && !$event['source'] && $cmd_response->getConfiguration('isResponseDevice'))) {
+								$this->myLog('Send reply : '.$cmd_response->getConfiguration('deviceid'));
 											$cmd_response->execute(array('title' => $reply, 'message' => $messageBody));
 										}
 									}
