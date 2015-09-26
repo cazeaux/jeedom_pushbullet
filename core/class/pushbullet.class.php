@@ -250,15 +250,13 @@ class pushbullet extends eqLogic {
 		}
 		else {
 			$bIsPushEnabled = $this->getConfiguration('isPushEnabled');
-			$jeedomDeviceName = 'jeedom_'.$this->id;
-		
+					
 			
 			// On récupère les commandes déjà créées, dans le cas d'un UPDATE. Vide s'il s'agit d'une première création
 			foreach ($this->getCmd() as $cmd) {
-				if (!$bIsPushEnabled && $cmd->getName() == $jeedomDeviceName) {
+				if (!$bIsPushEnabled && $cmd->getConfiguration('isPushChannel')) {
 					$cmd->remove();
 				}
-				
 			}
 		}
     }
@@ -394,7 +392,7 @@ class pushbullet extends eqLogic {
 		
 		// On supprime les commandes en trop et on update le device ALL
 		foreach ($arrayEquipmentCmd as $cmd) {
-			if ($arrayExistingCmd[$cmd->GetConfiguration('deviceid')] == 1 && $cmd->GetConfiguration('deviceid') != 'all' && $cmd->GetConfiguration('deviceid') != $jeedomDeviceId) {
+			if ($arrayExistingCmd[$cmd->GetConfiguration('deviceid')] == 1 && $cmd->GetConfiguration('deviceid') != 'all' && !$cmd->GetConfiguration('isPushChannel')) {
 				$cmd->remove();
 			}
 			else if ($cmd->getConfiguration('deviceid') == 'all') {
