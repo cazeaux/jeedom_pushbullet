@@ -284,7 +284,12 @@ class pushbullet extends eqLogic {
 		foreach ($arrayEquipmentCmd as $cmd) {
 			if ($cmd->GetConfiguration('isPushChannel')) {
 				$jeedomDeviceId = $cmd->getConfiguration('deviceid');
-				$cmd->remove();
+				if ($cmd->getName() != $jeedomDeviceName) {
+					$cmd->remove();
+				}
+				else {
+					$arrayExistingCmd[$jeedomDeviceId] = 1;
+				}
 			}
 			else {
 				$arrayExistingCmd[$cmd->GetConfiguration('deviceid')] = 1;
