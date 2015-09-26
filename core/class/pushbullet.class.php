@@ -107,7 +107,7 @@ class pushbullet extends eqLogic {
 							if ($command == PUSBULLET_COMMAND_RAPPEL_1 || $command == PUSBULLET_COMMAND_RAPPEL_2) {
 								$timestamp = strtotime($matches[2]);
 								if ($timestamp && $timestamp - date() > 60) {
-									$arrayCronOptions = array('pushbullet_id' => intval($this->getId()), 'cron_id' => time(), 'body' => $eventBody);
+									$arrayCronOptions = array('pushbullet_id' => intval($this->getId()), 'cron_id' => time(), 'body' => $eventBody, 'source' => $event['source']);
 									$cron = cron::byClassAndFunction('pushbullet', 'activateReminder', $arrayCronOptions);
 
 									if (!is_object($cron)) {
@@ -150,7 +150,14 @@ class pushbullet extends eqLogic {
 									}
 									
 									foreach ($this->getCmd() as $cmd_response) {
-										if($cmd_response->getConfiguration('isResponseDevice')) {
+										// 3 cas possibles ici, dans l'ordre:
+										// 1: pas d'envoi de la réponse à la source de la commande, donc on envoie aux devices sélectionnés
+										// 2: envoi de la réponse à la source de la commande, et on trouve le device source
+										// 3: envoi de la réponse à la source de la commande, on ne trouve pas le device source donc on envoie aux devices sélectionnés
+										
+										if(    (!$this->getConfiguration('sendBackReponseToSource') && $cmd_response->getConfiguration('isResponseDevice'))
+											|| ($this->getConfiguration('sendBackReponseToSource') && $cmd_response->getConfiguration('deviceid') == $event['source'])
+											|| ($this->getConfiguration('sendBackReponseToSource') && !$event['source'] && $cmd_response->getConfiguration('isResponseDevice'))) {
 											$cmd_response->execute(array('title' => $reply, 'message' => $messageBody));
 										}
 									}
@@ -214,7 +221,7 @@ class pushbullet extends eqLogic {
 				$this->myLog($push['body']);
 				if ($push['active'] && $push['target_device_iden'] == $pushdeviceid) {
 					$this->myLog('new push');
-					$return[] = array('timestamp' => $push['modified'], 'body' => $push['body'], 'title' => $push['title']);
+					$return[] = array('timestamp' => $push['modified'], 'body' => $push['body'], 'title' => $push['title'], 'source' => $push['source_device_iden']);
 				}
 				if ($bIsFirstPush) {
 					// Premier push de la liste, donc on en sauvegarde le timestamp pour la prochaine fois
@@ -312,6 +319,9 @@ class pushbullet extends eqLogic {
 
 					// si push désactivé, on supprime le device
 				}
+				
+				$this->setConfiguration('pushdeviceid', $deviceEntry["deviceid"]);
+
 			}
 			
 			$arrayExistingCmd[$deviceEntry["deviceid"]] = -1;
@@ -504,8 +514,6 @@ class pushbullet extends eqLogic {
     public function runDeamon() {
         $daemon_path = realpath(dirname(__FILE__) . '/../../ressources/pushbullet_daemon');
 
-        $config = template_replace($replace_config, $config);
-
         $cmd = 'nice -n 19 /usr/bin/python ' . $daemon_path . '/pushbullet.py '.$this->getConfiguration('token');
 
         $result = exec('nohup ' . $cmd . ' > /dev/null 2>&1 &');
@@ -541,7 +549,7 @@ class pushbullet extends eqLogic {
             return false;
         }
         $result = exec('cat /proc/' . $pid . '/cmdline | grep "pushbullet" | wc -l', $output, $retcode);
-        if ($retcode == 0 && $result == 0 && file_exists($pid_file)) {
+        if (($retcode == 0 && $result == 0 && file_exists($pid_file) ) || $retcode != 0) {
             unlink($pid_file);
             return false;
         }
@@ -600,14 +608,14 @@ class pushbulletCmd extends cmd {
 				$_options['title'] = __('[Jeedom] - Notification', __FILE__);
 			}
 			// prepare data
-			$arrayData = array("type" => "note", "title" => $_options['title'], "body" => $_options['message']);
+			$arrayData = array("type" => "note", "title" => $_options['title'], "body" => $_options['message'], "source_device_iden" => $eqLogic_pushbullet->getConfiguration('pushdeviceid'));
 
-			if ($this->getConfiguration('deviceid') != 'all') {
+			/*if ($this->getConfiguration('deviceid') != 'all') {
 				$arrayPushDevices = array($this->getConfiguration('deviceid'));
 			}
 			else {
 				$arrayPushDevices = explode(',', $this->getConfiguration('pushdeviceids'));
-			}
+			}*/
 
 			// sendRequest 
 			$curl = curl_init();
@@ -619,12 +627,12 @@ class pushbulletCmd extends cmd {
 			curl_setopt($curl, CURLOPT_USERPWD, $eqLogic_pushbullet->getConfiguration('token') . ":");
 			curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 			
-			foreach ($arrayPushDevices as $device) {
-				$arrayData["device_iden"] = $device;
-				curl_setopt($curl, CURLOPT_POSTFIELDS, $arrayData);
-				
-				curl_exec($curl);
+			if ($this->getConfiguration('deviceid') != 'all') {
+					$arrayData["device_iden"] = $this->getConfiguration('deviceid');
 			}
+			curl_setopt($curl, CURLOPT_POSTFIELDS, $arrayData);
+			curl_exec($curl);
+			
 			curl_close($curl);
 		}
     }
