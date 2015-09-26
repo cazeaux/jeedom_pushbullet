@@ -28,10 +28,10 @@ define('PUSHBULLETME', 'https://api.pushbullet.com/v2/users/me');
 
 class pushbullet extends eqLogic {
 
-	public function mylog($txt) {
+	public function mylog($txt) {/*
 		$fp = fopen('/tmp/log', 'a+');
 		fputs($fp, $txt."\n");
-		fclose($fp);
+		fclose($fp);*/
 	}
 
 
