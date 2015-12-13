@@ -272,8 +272,12 @@ class pushbullet extends eqLogic {
 				foreach (eqLogic::byType('pushbullet') as $pushbullet) {
 					if ($pushbullet->getId() != $currentId) {
 						foreach ($pushbullet->getCmd() as $cmd) {
+<<<<<<< HEAD
 	
 						if ($cmd->getConfiguration('isPushChannel') && strtolower($cmd->getName()) == strtolower($jeedomDeviceName)) {
+=======
+							if ($cmd->getConfiguration('isPushChannel') && $cmd->getName() == $jeedomDeviceName) {
+>>>>>>> 78506ee30b5db04d83910938f10c8306ef50104e
 								throw new Exception(__('Erreur Pushbullet : Nom de device "'.$jeedomDeviceName.'" déjà utilisé', __FILE__));
 							}
 						}
