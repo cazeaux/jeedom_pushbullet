@@ -246,7 +246,12 @@ class pushbullet extends eqLogic {
 
 
     public function preUpdate() {
+		$bIsPushEnabled = $this->getConfiguration('isPushEnabled');
+		$jeedomDeviceName = $this->getConfiguration('jeedomDeviceName');
+		$currentId = $this->getId();
+
 		$this->setCategory('Communication', 1);
+
         if ($this->getConfiguration('token') == '') {
             throw new Exception(__('Le Token ne peut être vide', __FILE__));
         }
@@ -254,13 +259,25 @@ class pushbullet extends eqLogic {
             throw new Exception(__('Erreur Pushbullet : Le Token fourni est invalide', __FILE__));
 		}
 		else {
-			$bIsPushEnabled = $this->getConfiguration('isPushEnabled');
-					
 			
 			// On récupère les commandes déjà créées, dans le cas d'un UPDATE. Vide s'il s'agit d'une première création
 			foreach ($this->getCmd() as $cmd) {
 				if (!$bIsPushEnabled && $cmd->getConfiguration('isPushChannel')) {
 					$cmd->remove();
+				}
+			}
+			
+			// On verifie si le nom de device pusbullet n'est pas deja utilise
+			if ($bIsPushEnabled) {
+				foreach (eqLogic::byType('pushbullet') as $pushbullet) {
+					if ($pushbullet->getId() != $currentId) {
+						foreach ($pushbullet->getCmd() as $cmd) {
+	
+						if ($cmd->getConfiguration('isPushChannel') && strtolower($cmd->getName()) == strtolower($jeedomDeviceName)) {
+								throw new Exception(__('Erreur Pushbullet : Nom de device "'.$jeedomDeviceName.'" déjà utilisé', __FILE__));
+							}
+						}
+					}
 				}
 			}
 		}
@@ -663,9 +680,12 @@ class pushbulletCmd extends cmd {
 			if ($_options['message'] == '' && $_options['title'] == '') {
 				throw new Exception(__('Le message et le sujet ne peuvent être vide', __FILE__));
 			}
+			/*
+			Depuis la 2.12, on retire le titre par defaut
 			if ($_options['title'] == '') {
 				$_options['title'] = __('[Jeedom] - Notification', __FILE__);
 			}
+			*/
 			// prepare data
 			$arrayData = array("type" => "note", "title" => $_options['title'], "body" => $_options['message']);
 			$jeedomDeviceId = $eqLogic_pushbullet->getJeedomDeviceId();
@@ -673,12 +693,6 @@ class pushbulletCmd extends cmd {
 				$arrayData["source_device_iden"] = $jeedomDeviceId;
 			}
 
-			/*if ($this->getConfiguration('deviceid') != 'all') {
-				$arrayPushDevices = array($this->getConfiguration('deviceid'));
-			}
-			else {
-				$arrayPushDevices = explode(',', $this->getConfiguration('pushdeviceids'));
-			}*/
 
 			// sendRequest 
 			$curl = curl_init();
