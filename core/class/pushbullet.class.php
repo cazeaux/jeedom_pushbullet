@@ -28,10 +28,10 @@ define('PUSHBULLETME', 'https://api.pushbullet.com/v2/users/me');
 
 class pushbullet extends eqLogic {
 
-	public function mylog($txt) {/*
+	public function mylog($txt) {
 		$fp = fopen('/tmp/log', 'a+');
 		fputs($fp, $txt."\n");
-		fclose($fp);*/
+		fclose($fp);
 	}
 
 
@@ -271,8 +271,9 @@ class pushbullet extends eqLogic {
 			if ($bIsPushEnabled) {
 				foreach (eqLogic::byType('pushbullet') as $pushbullet) {
 					if ($pushbullet->getId() != $currentId) {
-						foreach ($this->getCmd() as $cmd) {
-							if ($cmd->getConfiguration('isPushChannel') && $cmd->getName() == $jeedomDeviceName) {
+						foreach ($pushbullet->getCmd() as $cmd) {
+	
+						if ($cmd->getConfiguration('isPushChannel') && strtolower($cmd->getName()) == strtolower($jeedomDeviceName)) {
 								throw new Exception(__('Erreur Pushbullet : Nom de device "'.$jeedomDeviceName.'" déjà utilisé', __FILE__));
 							}
 						}
