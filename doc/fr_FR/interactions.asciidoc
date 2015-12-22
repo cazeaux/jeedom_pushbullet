@@ -1,14 +1,14 @@
-== Principe
+=== Principe
 
 Lorsque l'option **Activer les interactions sur cet équipement* est activée, tout push envoyé vers Jeedom (sous forme de notification basique ou programmée) sera alors injecté (immédiatement si notification basique, ou à l'horaire prévue si notification programmée) dans le moteur d'interactions de Jeedom.
 
 Le fait d'injecter le push dans le moteur d'interaction vient en complément du principe de base du push. Autrement dit en plus du déclenchement de l'interaction, le device Jeedom sera quand même mis à jour, et s'il y a lieu déclenchera les scénarios où ce device a été défini comme déclencheur.
 
-== Le message est injecté dans le moteur d'interactions
+=== Le message est injecté dans le moteur d'interactions
 
 Dans le moteur d'interaction, seul le message de la notification est injecté. Le titre n'est pas utilisé.
 
-== Réponse de l'interaction
+=== Réponse de l'interaction
 
 Si l'interaction donne lieu à une réponse, celle-ci peut être transmise via une notification vers un des devices Pushbullet. Les devices vers lesquels sont transmises les réponses doivent être sélectionnés dans la page de configuration de l'équipement Pushbullet (voir Pushbullet : Installation et configuration initiale).
 

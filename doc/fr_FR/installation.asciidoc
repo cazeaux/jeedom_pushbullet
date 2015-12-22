@@ -1,12 +1,4 @@
-== Sommaire
-
-1 Introduction et création d'un compte chez Pushbullet
-2 Vocabulaire
-3 Obtenir le token Pushbullet
-4 Installation du plugin
-5 Création d'un équipement
-
-== Introduction et création d'un compte chez Pushbullet
+=== Introduction et création d'un compte chez Pushbullet
 
 Le plugin pushbullet permet d'interagir avec le service http://www.pushbullet.com. Avant toute chose, il faut donc commencer par créer un compte gratuitement chez Pushbullet. Dans le plugin pushbullet, un compte pushbullet sera représenté par un équipement. Donc en cas de possession de plusieurs comptes Pushbullet, il sera possible de les associer à autant d'équipements. Il est aussi possible de créer plusieurs équipements sur le même compte Pushbullet, ça ne pose aucun problème.
 
@@ -15,7 +7,7 @@ Dans la suite des explications, nous ferons comme s'il n'y avait qu'un seul comp
 
 Une application Pushbullet est disponible sur Android et iPhone. Lors de l'installation de l'application, le smartphone sur lequel a été installée l'application apparaîtra dans la liste des devices (sur le compte qui aura été utilisé). Le smartphone devient ainsi capable de recevoir des notification push.
 
-== Vocabulaire
+=== Vocabulaire
 
 [cols="2"]
 |===
@@ -32,14 +24,14 @@ Une application Pushbullet est disponible sur Android et iPhone. Lors de l'insta
 |une clé associée au compte Pushbullet, qu'il faut récupérer sur le service Pushbullet
 |===
 
-== Obtenir le token Pushbullet
+=== Obtenir le token Pushbullet
 
 . Se connecter sur http://www.pushbullet.com
 . Cliquer sur l'icône de compte en haut à droite et cliquer sur "Account Settings"
 . Plugin pushbullet token.png
 . Générer un token si nécessaire
 
-== Installation du plugin
+=== Installation du plugin
 
 L'installation du plugin passe par le market, comme tous les plugins. Après installation, aucune configuration n'est nécessaire au niveau du plugin, tout se passe dans les équipements.
 
@@ -73,7 +65,7 @@ _Paramètres équipement Pushbullet_
 
 Après enregistrement, la liste des device apparaîtra.
 
-== Paramètres d'un device
+=== Paramètres d'un device
 
 [cols="2"]
 |===

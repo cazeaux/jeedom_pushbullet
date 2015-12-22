@@ -1,27 +1,22 @@
-== Sommaire
-
-1 Principe
-2 Notification simple
-3 Notification programmée
-4 Remarques
-
-== Principe
+=== Principe
 
 Il est possible d'envoyer un push vers Jeedom depuis l'application Pushbullet. L'application Pushbullet peut être celle sur Android, iPhone, ou plus simplement via http://www.pushbullet.com
 
 Les notifications reçues par Jeedom sont traitées quasi instantanément. Dans le cas (très rare) où plusieurs nouvelles notifications seraient envoyées simultanément, elles seront toutes prises en compte dans leur ordre d'arrivée.
 
 [IMPORTANT]
-Dans le cas de notifications multiples:
- * Toutes déclencheront une interaction (si les interactions sont activées sur l'équipement en question)
- * Seule la dernière déclenchera un scénario (si l'équipement est défini comme déclencheur d'un scénario). C'est une limitation actuelle de Jeedom, qui pourra être levée plus tard.
-Notification simple
+Toutes les notifications déclencheront une interaction (si les interactions sont activées sur l'équipement en question)
+
+[IMPORTANT]
+En cas de notifications multiples, seule la dernière notification déclenchera un scénario (si l'équipement est défini comme déclencheur d'un scénario). C'est une limitation actuelle de Jeedom, qui pourra être levée plus tard.
+
+=== Notification simple
 
 Une notification simple consiste à envoyer un push vers Jeedom qui sera immédiatement traitée. Ce traitement consiste à mettre à jour le device Jeedom avec comme nouvelle valeur ce qui aura été mis dans le message de la notification.
 
 Une telle notification s'envoie depuis Pushbullet avec :
 
-* Message : le contenu du message qui sera utilisé pour mettre à jour le device Jeedom
+* `Message` : le contenu du message qui sera utilisé pour mettre à jour le device Jeedom
 
 image::../images/pushbullet_push_basique2_new.png[]
 
@@ -35,7 +30,7 @@ _Exemple_:
 
 image::../images/pushbullet_push_basique1.png[]
 
-== Notification programmée
+=== Notification programmée
 
 Le principe d'une notification programmée est le même qu'une notification simple. La différence, c'est qu'il est possible de définir l'heure à laquelle le device Jeedom sera mis à jour. Ainsi, si par exemple le device Jeedom était associé comme déclencheur du scénario, il devient possible de déclencher le scénario à l'horaire souhaité.
 
@@ -61,7 +56,8 @@ _Exemples_
 
 image::../images/pushbullet_push_basique3_new.png[]
 
-== Remarques
+=== Remarques
 
-* Une notification programmée ne se déclenche qu'une seule fois, et uniquement à l'horaire programmé.
-* Il est possible de programmer plusieurs évènements (à des horaires différents ou pas).
+Une notification programmée ne se déclenche qu'une seule fois, et uniquement à l'horaire programmé.
+
+Il est possible de programmer plusieurs évènements (à des horaires différents ou pas).
