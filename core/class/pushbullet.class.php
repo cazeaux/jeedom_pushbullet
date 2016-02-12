@@ -87,55 +87,57 @@ class pushbullet extends eqLogic {
 						$sendEvent = true;
 						
 						$lines = explode("\n", $event['body']);
-						if (count($lines) > 1) {
+						if (count($lines) > 1 && 
+								preg_match('/([a-zA-Z]+)\s(.*)$/', strtolower($lines[0]), $matches) && 
+								(strtolower($matches[1]) == PUSBULLET_COMMAND_RAPPEL_1 || 
+								 strtolower($matches[1]) == PUSBULLET_COMMAND_RAPPEL_2)) {
+							$this->myLog('commande '.$matches[1].'/'.$matches[2]);
 							$eventBodies = array_slice($lines, 1);
 							$eventProgDate = $lines[0];
+							$command = strtolower($matches[1]);
 						}
 						else {
 							$eventBody = $lines[0];
+							$fullEventBody = $event['body'];
 							$eventProgDate = "";
 						}
 						$this->myLog('new event '.serialize($eventBody));
 						
 						
 						
-						if ($eventProgDate && preg_match('/([a-zA-Z]+)\s(.*)$/', strtolower($eventProgDate), $matches)) {
-							$command = strtolower($matches[1]);
-							$this->myLog('commande '.$matches[1].'/'.$matches[2]);
-							
+						if ($eventProgDate) {
+
 							// PUSH REMINDER
-							if ($command == PUSBULLET_COMMAND_RAPPEL_1 || $command == PUSBULLET_COMMAND_RAPPEL_2) {
-								$timestamp = strtotime($matches[2]);
-								if ($timestamp && $timestamp - date() > 60) {
-									foreach ($eventBodies as $eventBody) {
-										$arrayCronOptions = array('pushbullet_id' => intval($this->getId()), 'cron_id' => time(), 'body' => $eventBody, 'source' => $event['source']);
-										$cron = cron::byClassAndFunction('pushbullet', 'activateReminder', $arrayCronOptions);
+							$timestamp = strtotime($matches[2]);
+							if ($timestamp && $timestamp - date() > 60) {
+								foreach ($eventBodies as $eventBody) {
+									$arrayCronOptions = array('pushbullet_id' => intval($this->getId()), 'cron_id' => time(), 'body' => $eventBody, 'source' => $event['source']);
+									$cron = cron::byClassAndFunction('pushbullet', 'activateReminder', $arrayCronOptions);
 
-										if (!is_object($cron)) {
-											$cron = new cron();
-											$cron->setClass('pushbullet');
-											$cron->setFunction('activateReminder');
-											$cron->setOption($arrayCronOptions);
-											$cron->setOnce(1);
-										}
-
-										$cronDate = date('i', $timestamp) . ' ' . date('H', $timestamp) . ' ' . date('d', $timestamp) . ' ' . date('m', $timestamp) . ' * ' . date('Y', $timestamp);
-										$this->myLog('crontDate '.$cronDate);
-
-										$cron->setSchedule($cronDate);
-										$cron->save();
+									if (!is_object($cron)) {
+										$cron = new cron();
+										$cron->setClass('pushbullet');
+										$cron->setFunction('activateReminder');
+										$cron->setOption($arrayCronOptions);
+										$cron->setOnce(1);
 									}
-									$sendEvent = false;
-								} else {
-									$this->myLog('Reminder failed ');
-									$eventBody = 'Reminder failed';
+
+									$cronDate = date('i', $timestamp) . ' ' . date('H', $timestamp) . ' ' . date('d', $timestamp) . ' ' . date('m', $timestamp) . ' * ' . date('Y', $timestamp);
+									$this->myLog('crontDate '.$cronDate);
+
+									$cron->setSchedule($cronDate);
+									$cron->save();
 								}
+								$sendEvent = false;
+							} else {
+								$this->myLog('Reminder failed ');
+								$eventBody = 'Reminder failed';
 							}
 						}
 						
 						if ($sendEvent) {
 							$this->myLog('Send Event : '.$eventBody);
-							$eventBodyToSend = $eventBody;
+							$eventBodyToSend = $fullEventBody;
 							/*
 							MODIFICATION TEMPORAIRE : on sauvegarde l'eventBody à déclencher. Du coup, seul le dernier sera pris en compte
 							$this->myLog('Send normal event');
@@ -537,6 +539,7 @@ class pushbullet extends eqLogic {
     }
 	
 	function getJeedomDeviceId() {
+		$jeedomDeviceId = "NULL";
 		foreach ($this->getCmd() as $cmd) {
 			if ($cmd->getConfiguration('isPushChannel') == 1) {
 				$jeedomDeviceId = $cmd->getConfiguration('deviceid');
