@@ -389,6 +389,7 @@ class pushbullet extends eqLogic {
 			$device->setType('info');
 			$device->setSubType('string');
 			$device->setIsHistorized(0);
+			$device->setEventOnly(true);
 			$device->save();
 
 			//$this->setLastTimestamp($deviceTimestamp);
@@ -520,7 +521,7 @@ class pushbullet extends eqLogic {
 		curl_close($curl);
 		
 		return $return;
-    }
+  }
 
     public function removeJeedomDevice($jeedomDeviceId) {
 		
@@ -539,7 +540,7 @@ class pushbullet extends eqLogic {
     }
 	
 	function getJeedomDeviceId() {
-		$jeedomDeviceId = "NULL";
+		$jeedomDeviceId = "";
 		foreach ($this->getCmd() as $cmd) {
 			if ($cmd->getConfiguration('isPushChannel') == 1) {
 				$jeedomDeviceId = $cmd->getConfiguration('deviceid');
@@ -575,89 +576,132 @@ class pushbullet extends eqLogic {
 
 	
     public static function cron() {
-        foreach (eqLogic::byType('pushbullet') as $pushbullet) {
+      foreach (eqLogic::byType('pushbullet') as $pushbullet) {
+				if (is_object($pushbullet) && $pushbullet->getConfiguration('isPushEnabled')) {
+					if (!$pushbullet->deamonRunning()) {
+						$pushbullet->runDeamon();
+					}
+				}
+				else if (is_object($pushbullet) && !$pushbullet->getConfiguration('isPushEnabled')) {
+					if ($pushbullet->deamonRunning()) {
+						$pushbullet->stopDeamon();
+					}
+				}
+			}
+    }
+
+    /***************
+
+		Jeedom deamon management functions
+    ****************/
+
+		public static function deamon_info() {
+			$return = array();
+			$return['log'] = 'pushbullet';
+			$return['state'] = 'ok';
+			$return['launchable'] = 'ok';
+
+      foreach (eqLogic::byType('pushbullet') as $pushbullet) {
+				if (is_object($pushbullet) && $pushbullet->getConfiguration('isPushEnabled')) {
+					if (!$pushbullet->deamonRunning()) {
+						$return['state'] = 'nok';
+					}
+				}
+			}
+			return $return;			
+		}
+
+	public static function deamon_stop() {
+	  foreach (eqLogic::byType('pushbullet') as $pushbullet) {
+			$pushbullet->stopDeamon();
+		}
+	}
+
+	public static function deamon_start() {
+	  foreach (eqLogic::byType('pushbullet') as $pushbullet) {
 			if (is_object($pushbullet) && $pushbullet->getConfiguration('isPushEnabled')) {
 				if (!$pushbullet->deamonRunning()) {
 					$pushbullet->runDeamon();
 				}
 			}
-			else if (is_object($pushbullet) && !$pushbullet->getConfiguration('isPushEnabled')) {
-				if ($pushbullet->deamonRunning()) {
-					$pushbullet->stopDeamon();
-				}
-			}
 		}
+	}
+
+    /***************
+		END
+		Jeedom deamon management functions
+    ****************/
+
+
+
+  public function runDeamon() {
+    $daemon_path = realpath(dirname(__FILE__) . '/../../ressources/pushbullet_daemon');
+
+    $cmd = 'nice -n 19 /usr/bin/python ' . $daemon_path . '/pushbullet.py '.$this->getConfiguration('token');
+
+    $result = exec('nohup ' . $cmd . ' > /dev/null 2>&1 &');
+    if (strpos(strtolower($result), 'error') !== false || strpos(strtolower($result), 'traceback') !== false) {
+        log::add('sms', 'error', $result);
+        return false;
     }
 
-
-    public function runDeamon() {
-        $daemon_path = realpath(dirname(__FILE__) . '/../../ressources/pushbullet_daemon');
-
-        $cmd = 'nice -n 19 /usr/bin/python ' . $daemon_path . '/pushbullet.py '.$this->getConfiguration('token');
-
-        $result = exec('nohup ' . $cmd . ' > /dev/null 2>&1 &');
-        if (strpos(strtolower($result), 'error') !== false || strpos(strtolower($result), 'traceback') !== false) {
-            log::add('sms', 'error', $result);
-            return false;
-        }
-
-        sleep(2);
+    sleep(2);
+    if (!$this->deamonRunning()) {
+        sleep(10);
         if (!$this->deamonRunning()) {
-            sleep(10);
-            if (!$this->deamonRunning()) {
-                return false;
-            }
+            return false;
         }
     }
+  }
 
-    public function deamonRunning() {
-        $pid_file = realpath(dirname(__FILE__) . '/../../../../tmp/pushbullet.'.$this->getConfiguration('token').'.pid');
-        if (!file_exists($pid_file)) {
-            $pid = jeedom::retrievePidThread('pushbullet.py');
-            if ($pid != '' && is_numeric($pid)) {
-                exec('kill -9 ' . $pid);
-            }
-            return false;
+  public function deamonRunning() {
+    $pid_file = realpath(dirname(__FILE__) . '/../../../../tmp/pushbullet.'.$this->getConfiguration('token').'.pid');
+    if (!file_exists($pid_file)) {
+        $pid = jeedom::retrievePidThread('pushbullet.py');
+        if ($pid != '' && is_numeric($pid)) {
+            exec('kill -9 ' . $pid);
         }
-        $pid = trim(file_get_contents($pid_file));
-        if ($pid == '' || !is_numeric($pid)) {
-            $pid = jeedom::retrievePidThread('pushbullet.py');
-            if ($pid != '' && is_numeric($pid)) {
-                exec('kill -9 ' . $pid);
-            }
-            return false;
-        }
-        $result = exec('cat /proc/' . $pid . '/cmdline | grep "pushbullet" | wc -l', $output, $retcode);
-        if (($retcode == 0 && $result == 0 && file_exists($pid_file) ) || $retcode != 0) {
-            unlink($pid_file);
-            return false;
-        }
-        return true;
+        return false;
     }
+    $pid = trim(file_get_contents($pid_file));
+    if ($pid == '' || !is_numeric($pid)) {
+        $pid = jeedom::retrievePidThread('pushbullet.py');
+        if ($pid != '' && is_numeric($pid)) {
+            exec('kill -9 ' . $pid);
+        }
+        return false;
+    }
+    $result = exec('cat /proc/' . $pid . '/cmdline | grep "pushbullet" | wc -l', $output, $retcode);
+    if (($retcode == 0 && $result == 0 && file_exists($pid_file) ) || $retcode != 0) {
+        unlink($pid_file);
+        return false;
+    }
+    return true;
+  }
 
-    public function stopDeamon() {
-        if (!$this->deamonRunning()) {
-            return true;
-        }
-        $pid_file = dirname(__FILE__) . '/../../../../tmp/pushbullet.'.$this->getConfiguration('token').'.pid';
-        if (!file_exists($pid_file)) {
-            return true;
-        }
-        $pid = intval(file_get_contents($pid_file));
-        $kill = posix_kill($pid, 15);
-        $retry = 0;
-        while (!$kill && $retry < 10) {
-            $kill = posix_kill($pid, 9);
-            $retry++;
-        }
-        return !$kill;
-    }
+  public function stopDeamon() {
+      if (!$this->deamonRunning()) {
+          return true;
+      }
+      $pid_file = dirname(__FILE__) . '/../../../../tmp/pushbullet.'.$this->getConfiguration('token').'.pid';
+      if (!file_exists($pid_file)) {
+          return true;
+      }
+      $pid = intval(file_get_contents($pid_file));
+      $kill = posix_kill($pid, 15);
+      $retry = 0;
+      while (!$kill && $retry < 10) {
+          $kill = posix_kill($pid, 9);
+          $retry++;
+      }
+      return !$kill;
+  }
 
 	public static function stopAllDeamon() {
-        foreach (eqLogic::byType('pushbullet') as $pushbullet) {
+    foreach (eqLogic::byType('pushbullet') as $pushbullet) {
 			$pushbullet->stopDeamon();
 		}
-    }
+  }
 
   
 }
@@ -671,50 +715,50 @@ class pushbulletCmd extends cmd {
 
     /*     * *********************Methode d'instance************************* */
     public function execute($_options = null) {
-        $eqLogic_pushbullet = $this->getEqLogic();
+      $eqLogic_pushbullet = $this->getEqLogic();
 		
-		if ($this->getConfiguration('isPushChannel') == 1) {
-			return $eqLogic_pushbullet->getLastValue();
-		}
-		else {
-			if ($_options === null) {
-				throw new Exception(__('Les options de la fonction ne peuvent etre null', __FILE__));
+			if ($this->getConfiguration('isPushChannel') == 1) {
+				return $eqLogic_pushbullet->getLastValue();
 			}
-			if ($_options['message'] == '' && $_options['title'] == '') {
-				throw new Exception(__('Le message et le sujet ne peuvent être vide', __FILE__));
-			}
-			/*
-			Depuis la 2.12, on retire le titre par defaut
-			if ($_options['title'] == '') {
-				$_options['title'] = __('[Jeedom] - Notification', __FILE__);
-			}
-			*/
-			// prepare data
-			$arrayData = array("type" => "note", "title" => $_options['title'], "body" => $_options['message']);
-			$jeedomDeviceId = $eqLogic_pushbullet->getJeedomDeviceId();
-			if ($jeedomDeviceId) {
-				$arrayData["source_device_iden"] = $jeedomDeviceId;
-			}
+			else {
+				if ($_options === null) {
+					throw new Exception(__('Les options de la fonction ne peuvent etre null', __FILE__));
+				}
+				if ($_options['message'] == '' && $_options['title'] == '') {
+					throw new Exception(__('Le message et le sujet ne peuvent être vide', __FILE__));
+				}
+				/*
+				Depuis la 2.12, on retire le titre par defaut
+				if ($_options['title'] == '') {
+					$_options['title'] = __('[Jeedom] - Notification', __FILE__);
+				}
+				*/
+				// prepare data
+				$arrayData = array("type" => "note", "title" => $_options['title'], "body" => $_options['message']);
+				$jeedomDeviceId = $eqLogic_pushbullet->getJeedomDeviceId();
+				if ($jeedomDeviceId) {
+					$arrayData["source_device_iden"] = $jeedomDeviceId;
+				}
 
 
-			// sendRequest 
-			$curl = curl_init();
-			curl_setopt($curl, CURLOPT_URL, PUSHBULLETURL);
-			curl_setopt($curl, CURLOPT_POST, true);
-			curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-			curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-			curl_setopt($curl, CURLOPT_USERPWD, $eqLogic_pushbullet->getConfiguration('token') . ":");
-			curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-			
-			if ($this->getConfiguration('deviceid') != 'all') {
-					$arrayData["device_iden"] = $this->getConfiguration('deviceid');
+				// sendRequest 
+				$curl = curl_init();
+				curl_setopt($curl, CURLOPT_URL, PUSHBULLETURL);
+				curl_setopt($curl, CURLOPT_POST, true);
+				curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+				curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+				curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+				curl_setopt($curl, CURLOPT_USERPWD, $eqLogic_pushbullet->getConfiguration('token') . ":");
+				curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+				
+				if ($this->getConfiguration('deviceid') != 'all') {
+						$arrayData["device_iden"] = $this->getConfiguration('deviceid');
+				}
+				curl_setopt($curl, CURLOPT_POSTFIELDS, $arrayData);
+				curl_exec($curl);
+				
+				curl_close($curl);
 			}
-			curl_setopt($curl, CURLOPT_POSTFIELDS, $arrayData);
-			curl_exec($curl);
-			
-			curl_close($curl);
-		}
     }
 	
 	public function preRemove() {
