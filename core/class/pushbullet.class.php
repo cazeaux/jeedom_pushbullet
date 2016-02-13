@@ -574,7 +574,7 @@ class pushbullet extends eqLogic {
         return true;
     }
 
-	
+	/*
     public static function cron() {
       foreach (eqLogic::byType('pushbullet') as $pushbullet) {
 				if (is_object($pushbullet) && $pushbullet->getConfiguration('isPushEnabled')) {
@@ -589,7 +589,7 @@ class pushbullet extends eqLogic {
 				}
 			}
     }
-
+*/
     /***************
 
 		Jeedom deamon management functions
