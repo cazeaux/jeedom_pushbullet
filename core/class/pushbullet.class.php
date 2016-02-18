@@ -28,13 +28,6 @@ define('PUSHBULLETME', 'https://api.pushbullet.com/v2/users/me');
 
 class pushbullet extends eqLogic {
 
-	public function mylog($txt) {/*
-		$fp = fopen('/tmp/log', 'a+');
-		fputs($fp, $txt."\n");
-		fclose($fp);*/
-	}
-
-
     public static function pull($_options) {
       foreach (eqLogic::byType('pushbullet') as $pushbullet) {
 				if (is_object($pushbullet) && $pushbullet->getConfiguration('isPushEnabled')) {
@@ -45,11 +38,12 @@ class pushbullet extends eqLogic {
 
 	public static function activateReminder($_options) {
 		$pushbullet = pushbullet::byId($_options['pushbullet_id']);
-//		$pushbullet->myLog('reminder '.serialize($_options));
-        if (is_object($pushbullet)) {
+		log::add('pushbullet', 'debug', 'activate reminder '.serialize($_options));
+    
+    if (is_object($pushbullet)) {
 			foreach ($pushbullet->getCmd() as $cmd) {
 				if($cmd->getConfiguration('isPushChannel')) {
-//					$pushbullet->myLog('send event reminder '.$_options['body']);
+					log::add('pushbullet', 'debug', '('.$pushbullet->getId().') send event reminder '.$_options['body']);
 					$cmd->event($_options['body']);
 					$pushbullet->setLastValue($_options['body']);
 					// Lancement des interactions
@@ -87,30 +81,50 @@ class pushbullet extends eqLogic {
 					if ($event["body"])	{
 						// vérification des commandes avancés
 						$sendEvent = true;
-						
-						$lines = explode("\n", $event['body']);
-						if (count($lines) > 1 && 
-								preg_match('/([a-zA-Z]+)\s(.*)$/', strtolower($lines[0]), $matches) && 
-								(strtolower($matches[1]) == PUSBULLET_COMMAND_RAPPEL_1 || 
-								 strtolower($matches[1]) == PUSBULLET_COMMAND_RAPPEL_2)) {
-							$this->myLog('commande '.$matches[1].'/'.$matches[2]);
+
+						/* Mode retrocompatible : si le premier caractère est P suivi d'un espace, alors on considère que le format d'une commande avec une programmation est de la forme:
+								P 4 hours
+								tv off
+
+						Sinon, c'est le nouveau format:
+								/4 hours/tv off
+
+						*/ 
+						if (strtolower(substr($event['body'], 0, 2) == 'p ')) {
+							$lines = explode("\n", $event['body']);
 							$eventBodies = array_slice($lines, 1);
+							// la date se trouve après le "p "
+							$eventProgDate = substr($lines[0], 2);
+							log::add('pushbullet', 'debug', '('.$this->getId().') push with programm, retrocompatible, date: '. $eventProgDate);
+
+							log::add('pushbullet', 'debug', '('.$this->getId().') new event '.serialize($eventBodies));
+						}
+						else if (strtolower($event['body'][0] == '/')) {
+							$lines = preg_split("/\//", $event['body'], -1, PREG_SPLIT_NO_EMPTY);
+							$eventBodies = array_slice($lines, 1);
+							// la date se trouve après le "p "
 							$eventProgDate = $lines[0];
-							$command = strtolower($matches[1]);
+							log::add('pushbullet', 'debug', '('.$this->getId().') push with programm, new format, date: '. $eventProgDate);
+							log::add('pushbullet', 'debug', '('.$this->getId().') new event '.serialize($eventBodies));
+
 						}
 						else {
 							$eventBody = $lines[0];
 							$fullEventBody = $event['body'];
 							$eventProgDate = "";
+							log::add('pushbullet', 'debug', '('.$this->getId().') push without programm');
+							log::add('pushbullet', 'debug', '('.$this->getId().') new event '.serialize($eventBody));
 						}
-						log::add('pushbullet', 'debug', '('.$this->getId().') new event '.serialize($eventBody));
+
+
+						
 						
 						
 						
 						if ($eventProgDate) {
 
 							// PUSH REMINDER
-							$timestamp = strtotime($matches[2]);
+							$timestamp = strtotime($eventProgDate);
 							if ($timestamp && $timestamp - date() > 60) {
 								foreach ($eventBodies as $eventBody) {
 									$arrayCronOptions = array('pushbullet_id' => intval($this->getId()), 'cron_id' => time(), 'body' => $eventBody, 'source' => $event['source']);
@@ -125,13 +139,14 @@ class pushbullet extends eqLogic {
 									}
 
 									$cronDate = date('i', $timestamp) . ' ' . date('H', $timestamp) . ' ' . date('d', $timestamp) . ' ' . date('m', $timestamp) . ' * ' . date('Y', $timestamp);
-									$this->myLog('crontDate '.$cronDate);
+									log::add('pushbullet', 'debug', '('.$this->getId().') crontDate '.$cronDate);
 
 									$cron->setSchedule($cronDate);
 									$cron->save();
 								}
 								$sendEvent = false;
-							} else {
+							}
+							else {
 								log::add('pushbullet', 'debug', '('.$this->getId().') Reminder failed ');
 								$eventBody = 'Reminder failed';
 							}
@@ -227,13 +242,21 @@ class pushbullet extends eqLogic {
 		$curlData = curl_exec($curl);
 		if ($curlData) {
 			$jsonData = json_decode($curlData, true);
-			$this->myLog($curlData);
 			foreach ($jsonData['pushes'] as $push)
 			{
 				log::add('pushbullet', 'debug', '('.$this->getId().') new push'.serialize($push));
-				if ($push['active'] && $push['target_device_iden'] == $pushdeviceid) {
+				if ($this->getConfiguration('listenAllPushes')) {
+					log::add('pushbullet', 'debug', '('.$this->getId().') listen all pushes');
+				}
+
+				if ($push['active'] 
+						&& (
+									($push['target_device_iden'] == $pushdeviceid)
+							||	($this->getConfiguration('listenAllPushes') && $push['source_device_iden'] != $pushdeviceid && !$push['target_device_iden']))) {
+
 					log::add('pushbullet', 'debug', '('.$this->getId().') push targeted to jeedom : '.$push['body'].' from '.$push['source_device_iden']);
 					$return[] = array('timestamp' => $push['modified'], 'body' => $push['body'], 'title' => $push['title'], 'source' => $push['source_device_iden']);
+
 				}
 				if ($bIsFirstPush) {
 					// Premier push de la liste, donc on en sauvegarde le timestamp pour la prochaine fois
@@ -296,7 +319,7 @@ class pushbullet extends eqLogic {
 	
 
 	public function postUpdate() {
- 		$this->mylog('POST UPDATE');
+ 		log::add('pushbullet', 'debug', '('.$this->getId().') POSTUPDATE');
 		$arrayExistingCmd = array();
 		$jeedomDeviceExitsAtPushbullet = 0;
 		$bCreatePushDevice = true;

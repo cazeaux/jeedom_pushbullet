@@ -56,6 +56,9 @@ _Paramètres équipement Pushbullet_
 |Ne pas inclure la commande reçue dans les réponses envoyées après exécution d'une interaction
 |Ce paramètre s'applique aux réponses émises vers les devices Jeedom sélectionnés (voir plus bas), après traitement d'une interaction et ce après réception par Jeedom d'un push. Par défaut, la réponse envoyée informe de la commande initiale (celle initialement reçue sur le push, et qui a servi à déclencher l'interaction). Par exemple: "commande initiale : quelle est la température du salon?". Cocher cette option permet de retirer cette information de la réponse.
 
+|Ecouter les push entrant sur jeedom "envoyés à tous" (en plus de ceux explicitement envoyés à Jeedom)
+|Désactivé par défaut. Certaines applications comme IFTTT ne permettent pas d'envoyer une notification à un device en particulier, mais seulement à tous. Lorsqu'activé, ce paramètre permet de prendre en compte ces notifications (en plus de celles envoyées à Jeedom explicitement). Toutefois, les notifications envoyées de Jeedom de cet équipement vers cet équipement seront ignorées (pour éviter les boucles).
+
 |Timestamp
 |Une information technique qui indique l'heure du dernier push analaysé
 

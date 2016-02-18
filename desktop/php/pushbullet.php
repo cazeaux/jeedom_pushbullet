@@ -109,10 +109,16 @@ $eqLogics = eqLogic::byType('pushbullet')
                         <input type="checkbox" class="eqLogicAttr bootstrapSwitch" data-label-text="{{Activé}}" data-l1key="configuration" data-l2key="isInteractionEnabled" checked/>
                     </div>
                 </div>
-                 <div class="form-group">
+                <div class="form-group">
                     <label class="col-sm-3 control-label">{{Inclure la commande reçue dans les réponses envoyées après exécution d'une interaction}}</label>
                     <div class="col-sm-9">
                         <input type="checkbox" class="eqLogicAttr bootstrapSwitch" data-label-text="{{Activé}}" data-l1key="configuration" data-l2key="dismissInitialCommandeInReply" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">{{Ecouter les push entrant sur jeedom "envoyés à tous" (en plus de ceux explicitement envoyés à Jeedom)}}</label>
+                    <div class="col-sm-9">
+                        <input type="checkbox" class="eqLogicAttr bootstrapSwitch" data-label-text="{{Activé}}" data-l1key="configuration" data-l2key="listenAllPushes" />
                     </div>
                 </div>
             </fieldset> 

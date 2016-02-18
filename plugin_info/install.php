@@ -36,20 +36,12 @@ function pushbullet_install() {
        
 }
 
-function pushbullet_update() {
-    $cron = cron::byClassAndFunction('pushbullet', 'pull');
-	if (is_object($cron)) {
-        $cron->remove();
+function pushbullet_update() {  
+    foreach (eqLogic::byType('pushbullet') as $pushbullet) {
+        if (!$pushbullet->getConfiguration('listenAllPushes')) {
+            $pushbullet->setConfiguration('listenAllPushes', 0);
+        }
     }
-    
-	foreach (eqLogic::byType('pushbullet') as $pushbullet) {
-		foreach ($pushbullet->getCmd() as $cmd) {
-			if($cmd->getConfiguration('isPushChannel')) {
-				$cmd->setSubType('string');
-				$cmd->save();
-			}
-		}
-	}
 	
     if (method_exists('pushbullet', 'stopAllDeamon')) {
         pushbullet::stopAllDeamon();

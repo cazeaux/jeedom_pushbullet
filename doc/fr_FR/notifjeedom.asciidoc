@@ -34,7 +34,9 @@ image::../images/pushbullet_push_basique1.png[]
 
 Le principe d'une notification programmée est le même qu'une notification simple. La différence, c'est qu'il est possible de définir l'heure à laquelle le device Jeedom sera mis à jour. Ainsi, si par exemple le device Jeedom était associé comme déclencheur du scénario, il devient possible de déclencher le scénario à l'horaire souhaité.
 
-L'envoi d'une notification programmée s'effectue de la même manière qu'une notification simple, mais le contenu du message sera constituer de 2 lignes:
+==== Format de message (ancienne version, toujours supportée)
+
+L'envoi d'une notification programmée s'effectue de la même manière qu'une notification simple, mais le contenu du message sera constitué de 2 lignes:
 
 * La première ligne contient l'heure de programmation, au format ci-dessous
 
@@ -42,9 +44,10 @@ L'envoi d'une notification programmée s'effectue de la même manière qu'une no
 
 Où `<heure>` correspond à l'horaire souhaitée
 
-* La seconde ligne contient le message envoyé à jeedom
-
 La syntaxe de `<heure>` suit celle définie ici : http://php.net/manual/fr/datetime.formats.php. Les formats absolus et relatifs sont supportés
+
+* Les lignes suivantes contiennent les messages envoyés à jeedom
+
 
 _Exemples_
 
@@ -55,6 +58,31 @@ _Exemples_
     P 72 hours -> programmera un évènement qui se déclenchera dans 72 heures
 
 image::../images/pushbullet_push_basique3_new.png[]
+
+==== Format de message (nouvelle version, depuis v2.50)
+
+L'envoi d'une notification programmée s'effectue de la même manière qu'une notification simple, mais le contenu du message sera formatté sur une seule ligne avec '/' comme séparateur et comme premier caractère:
+
+* La première partie contient l'heure de programmation, au format ci-dessous
+
+    <heure>
+
+Où `<heure>` correspond à l'horaire souhaitée
+
+La syntaxe de `<heure>` suit celle définie ici : http://php.net/manual/fr/datetime.formats.php. Les formats absolus et relatifs sont supportés
+
+* Les parties suivantes contiennentt les message envoyés à jeedom
+
+
+_Exemples_
+
+    /18:30/message 1/message 2 -> programmera un évènement pour 18h30 le même jour
+
+    /25-12-2014 20:00/message 1/message 2 -> programmera un évènement le jour de Noël à 20:00
+
+    /72 hours/message 1/message 2 -> programmera un évènement qui se déclenchera dans 72 heures
+
+
 
 === Remarques
 
