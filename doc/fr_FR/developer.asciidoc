@@ -1,0 +1,38 @@
+=== Envoi d'une notifiation classique vers Pushbullet
+
+Pour envoyer une notification avec un texte classique en invoquant une commande Pushbullet, il suffit de passer en paramètre le chemin du fichier, comme décrit dans l'exemple de code ci-dessous.
+
+	$_options['title'] = 'my title';
+	$_options['message'] = 'my message';
+	$cmd = /* objet commande Pushbullet */;
+	$cmd->execCmd($_options);
+
+Au moins un des deux paramètres 'title' ou 'message' doit être non vide. Il est recommandé de privilégier l'usage de 'message'.
+
+=== Envoi d'un fichier local vers Pushbullet
+
+Pour envoyer un fichier (qui se trouve localement sur le serveur de Jeedom) en invoquant une commande Pushbullet, il suffit de passer en paramètre le chemin du fichier, comme décrit dans l'exemple de code ci-dessous.
+
+	$filename = '/tmp/myfile.txt';
+	$_options['files'] = array($filename);
+	$cmd = /* objet commande Pushbullet */;
+	$cmd->execCmd($_options);
+
+
+=== Envoi d'une URL vers Pushbullet
+Pour envoyer une URL pointant sur une image (pas d'autres format supportés) en invoquant une commande Pushbullet, il suffit de passer en paramètre l'URL, comme décrit dans l'exemple de code ci-dessous.
+
+	$url = 'https://goo.gl/pBexp5';
+	$_options['title'] = $url;
+	$cmd = /* objet commande Pushbullet */;
+	$cmd->execCmd($_options);
+
+Si l'URL ne pointe pas vers une image, la notification sera traitée comme une notification classique.
+
+=== Ordre de priorité
+
+Les 3 types de notifications (classique, fichier, URL) sont exclusifs. L'ordre de priorité suivant s'applique:
+
+* fichier
+* URL
+* classique

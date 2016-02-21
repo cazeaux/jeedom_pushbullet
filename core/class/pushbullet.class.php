@@ -24,9 +24,73 @@ define('PUSHBULLETURLDEVICES', 'https://api.pushbullet.com/v2/devices');
 define('PUSBULLET_COMMAND_RAPPEL_1', 'rappel');
 define('PUSBULLET_COMMAND_RAPPEL_2', 'p');
 define('PUSHBULLETME', 'https://api.pushbullet.com/v2/users/me');
+define('PUSHBULLETURLUPLOADREQ', 'https://api.pushbullet.com/v2/upload-request');
 
 
 class pushbullet extends eqLogic {
+
+
+		public function doCurlRequest ($_url, $_method, $_data=null, $_dataType = 'json', $_useAuth=true) {
+
+			log::add('pushbullet', 'debug', '('.$this->getId().') curl request '.$_method.' '.$_url.' ('.serialize($_data).')');
+			$curl = curl_init();
+		
+			// Servira a setter le dernier timestamp sur le dernier push de la liste
+			curl_setopt($curl, CURLOPT_URL, $_url);
+			switch ($_method) {
+				case 'GET':
+					curl_setopt($curl, CURLOPT_HTTPGET, true);
+					break;
+
+				case 'POST':
+					curl_setopt($curl, CURLOPT_POST, true);
+					break;
+
+				case 'DELETE':
+					curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
+					break;
+
+			}
+
+			curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+			curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+			if ($_useAuth) {
+				curl_setopt($curl, CURLOPT_USERPWD, $this->getConfiguration('token') . ':');
+				curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+			}
+			log::add('pushbullet', 'debug', 'A');
+			if ($_data) {
+				switch ($_dataType) {
+					case 'json':
+						$dataJson = json_encode($_data);
+						curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json','Content-Length: ' . strlen($dataJson)));
+						curl_setopt($curl, CURLOPT_POSTFIELDS, $dataJson);
+						break;
+					case 'file':
+						curl_setopt($curl, CURLOPT_POSTFIELDS, $_data);
+						break;
+
+
+				}
+			}
+
+			curl_setopt($curl, CURLOPT_FAILONERROR, true);
+
+
+			$curlData = curl_exec($curl);
+			$errno = curl_errno($curl);
+			if ($errno) {
+				log::add('pushbullet', 'debug', '('.$this->getId().') curl error ('.$errno.')');
+			}
+			log::add('pushbullet', 'debug', '('.$this->getId().') curl response ('.serialize($curlData).')');
+
+			curl_close($curl);
+
+			return array($curlData, $errno);
+
+		}
 
     public static function pull($_options) {
       foreach (eqLogic::byType('pushbullet') as $pushbullet) {
@@ -70,7 +134,7 @@ class pushbullet extends eqLogic {
 	
 	public function checkLastPush() {
 		log::add('pushbullet', 'debug', 'check last push on '.$this->getName().' ('.$this->getId().')');
-		$eventBodyToSend = "";
+		$eventBodyToSend = '';
 		foreach ($this->getCmd() as $cmd) {
 			if($cmd->getConfiguration('isPushChannel')) {
 				$events = $this->getLastPush($cmd->getConfiguration('deviceid'));
@@ -78,7 +142,7 @@ class pushbullet extends eqLogic {
 				log::add('pushbullet', 'debug', '('.$this->getId().') new events '.serialize($events));
 				
 				foreach ($events as $event) {
-					if ($event["body"])	{
+					if ($event['body'])	{
 						// vérification des commandes avancés
 						$sendEvent = true;
 
@@ -91,29 +155,30 @@ class pushbullet extends eqLogic {
 
 						*/ 
 						if (strtolower(substr($event['body'], 0, 2) == 'p ')) {
-							$lines = explode("\n", $event['body']);
+							$lines = explode('\n', $event['body']);
 							$eventBodies = array_slice($lines, 1);
-							// la date se trouve après le "p "
+							// la date se trouve après le 'p '
 							$eventProgDate = substr($lines[0], 2);
 							log::add('pushbullet', 'debug', '('.$this->getId().') push with programm, retrocompatible, date: '. $eventProgDate);
 
 							log::add('pushbullet', 'debug', '('.$this->getId().') new event '.serialize($eventBodies));
 						}
 						else if (strtolower($event['body'][0] == '/')) {
-							$lines = preg_split("/\//", $event['body'], -1, PREG_SPLIT_NO_EMPTY);
+							$lines = preg_split('/\//', $event['body'], -1, PREG_SPLIT_NO_EMPTY);
 							$eventBodies = array_slice($lines, 1);
-							// la date se trouve après le "p "
+							// la date se trouve après le 'p '
 							$eventProgDate = $lines[0];
 							log::add('pushbullet', 'debug', '('.$this->getId().') push with programm, new format, date: '. $eventProgDate);
 							log::add('pushbullet', 'debug', '('.$this->getId().') new event '.serialize($eventBodies));
 
 						}
 						else {
+							$lines = explode('\n', $event['body']);
 							$eventBody = $lines[0];
 							$fullEventBody = $event['body'];
-							$eventProgDate = "";
+							$eventProgDate = '';
 							log::add('pushbullet', 'debug', '('.$this->getId().') push without programm');
-							log::add('pushbullet', 'debug', '('.$this->getId().') new event '.serialize($eventBody));
+							log::add('pushbullet', 'debug', '('.$this->getId().') new event '.$eventBody);
 						}
 
 
@@ -223,23 +288,13 @@ class pushbullet extends eqLogic {
 	public function getLastPush($pushdeviceid) {
 		// sendRequest 
 		$return = array();
-		$curl = curl_init();
-		
-		// Servira a setter le dernier timestamp sur le dernier push de la liste
 		$bIsFirstPush = true;
 
 		$timestamp = $this->getLastTimestamp();
 		if (!$timestamp) $timestamp = 0;
-		curl_setopt($curl, CURLOPT_URL, PUSHBULLETURL.'?modified_after='.$timestamp);
-		curl_setopt($curl, CURLOPT_HTTPGET, true);
-		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($curl, CURLOPT_USERPWD, $this->getConfiguration('token') . ":");
-		curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+
+		list($curlData,$curlerrno) = $this->doCurlRequest(PUSHBULLETURL.'?modified_after='.$timestamp, 'GET');
 		
-		
-		$curlData = curl_exec($curl);
 		if ($curlData) {
 			$jsonData = json_decode($curlData, true);
 			foreach ($jsonData['pushes'] as $push)
@@ -266,10 +321,9 @@ class pushbullet extends eqLogic {
 			}
 		}
 		else {
-			log::add('pushbullet', 'error', '('.$this->getId().') curl error '.curl_error($curl));
-			throw new Exception(__('Erreur Pushbullet Cron : '.curl_error($curl), __FILE__));
+			log::add('pushbullet', 'error', '('.$this->getId().') curl error');
+			//throw new Exception(__('Erreur Pushbullet Cron : '.curl_error($curl), __FILE__));
 		}
-		curl_close($curl);
 
 		return array_reverse($return);
 			
@@ -358,20 +412,20 @@ class pushbullet extends eqLogic {
 		
 		// on crée les commandes des devices PUSHBULLET si elles n'existent pas encore
 		foreach ($arrayDevices as $deviceEntry) {
-			log::add('pushbullet', 'debug', '('.$this->getId().') POSTUPDATE '.$deviceEntry["name"]);
+			log::add('pushbullet', 'debug', '('.$this->getId().') POSTUPDATE '.$deviceEntry['name']);
 
-			if ($deviceEntry["deviceid"] != $jeedomDeviceId) {
-				$arrayAllDevices[] = $deviceEntry["deviceid"];
+			if ($deviceEntry['deviceid'] != $jeedomDeviceId) {
+				$arrayAllDevices[] = $deviceEntry['deviceid'];
 			}
 			
 			// Device normaux (type action)
-			if (!isset($arrayExistingCmd[$deviceEntry["deviceid"]]) && $deviceEntry["deviceid"] != $jeedomDeviceId) {
+			if (!isset($arrayExistingCmd[$deviceEntry['deviceid']]) && $deviceEntry['deviceid'] != $jeedomDeviceId) {
 				// On marque le device comme étant valide.
-				log::add('pushbullet', 'debug', '('.$this->getId().') POSTUPDATE create new jeedom CMD with '.__($deviceEntry["name"], __FILE__));
+				log::add('pushbullet', 'debug', '('.$this->getId().') POSTUPDATE create new jeedom CMD with '.__($deviceEntry['name'], __FILE__));
 				$device = new pushbulletCmd();
-				$device->setName(__($deviceEntry["name"], __FILE__));
+				$device->setName(__($deviceEntry['name'], __FILE__));
 				$device->setEqLogic_id($this->id);
-				$device->setConfiguration('deviceid', $deviceEntry["deviceid"]);
+				$device->setConfiguration('deviceid', $deviceEntry['deviceid']);
 				$device->setUnite('');
 				$device->setType('action');
 				$device->setSubType('message');
@@ -379,11 +433,11 @@ class pushbullet extends eqLogic {
 				$device->save();
 			}
 			// Device spécifique pour le push (type info)
-			else if ($deviceEntry["deviceid"] == $jeedomDeviceId) {
+			else if ($deviceEntry['deviceid'] == $jeedomDeviceId) {
 
 				$jeedomDeviceExitsAtPushbullet = $deviceEntry;
 				
-				if (isset($arrayExistingCmd[$deviceEntry["deviceid"]])) {
+				if (isset($arrayExistingCmd[$deviceEntry['deviceid']])) {
 					// Le device push existe déjà, on ne le recrée pas
 					log::add('pushbullet', 'debug', '('.$this->getId().') POSTUPDATE push device already exists');
 					$bCreatePushDevice = false;
@@ -393,7 +447,7 @@ class pushbullet extends eqLogic {
 				
 			}
 			
-			$arrayExistingCmd[$deviceEntry["deviceid"]] = -1;
+			$arrayExistingCmd[$deviceEntry['deviceid']] = -1;
 			
 		}
 
@@ -402,11 +456,11 @@ class pushbullet extends eqLogic {
 			if (!$jeedomDeviceExitsAtPushbullet) {
 				log::add('pushbullet', 'debug', '('.$this->getId().') POSTUPDATE create jeedom device on pushbullet.com');
 				$jeedomDevice = $this->createJeedomDevice($jeedomDeviceName);
-				$jeedomDeviceId = $jeedomDevice["deviceid"];
-				$deviceTimestamp = $jeedomDevice["timestamp"];
+				$jeedomDeviceId = $jeedomDevice['deviceid'];
+				$deviceTimestamp = $jeedomDevice['timestamp'];
 			}
 			else {
-				$jeedomDeviceId = $jeedomDeviceExitsAtPushbullet["deviceid"];
+				$jeedomDeviceId = $jeedomDeviceExitsAtPushbullet['deviceid'];
 				$deviceTimestamp = 0;
 				
 			}
@@ -416,6 +470,7 @@ class pushbullet extends eqLogic {
 			$device->setEqLogic_id($this->id);
 			$device->setConfiguration('deviceid', $jeedomDeviceId);
 			$device->setConfiguration('isPushChannel', '1');
+			$device->setLogicalId('pushChannel');
 			$device->setUnite('');
 			$device->setType('info');
 			$device->setSubType('string');
@@ -435,12 +490,12 @@ class pushbullet extends eqLogic {
 		
 		// device 'ALL'
 		if (!isset($arrayExistingCmd['all'])) {
-			log::add('pushbullet', 'debug', '('.$this->getId().') POSTUPDATE create device ALL with '.implode(",", $arrayAllDevices));
+			log::add('pushbullet', 'debug', '('.$this->getId().') POSTUPDATE create device ALL with '.implode(',', $arrayAllDevices));
 			$device = new pushbulletCmd();
 			$device->setName(__('Tous les devices', __FILE__));
 			$device->setEqLogic_id($this->id);
 			$device->setConfiguration('deviceid', 'all');
-			$device->setConfiguration('pushdeviceids', implode(",", $arrayAllDevices));
+			$device->setConfiguration('pushdeviceids', implode(',', $arrayAllDevices));
 			$device->setUnite('');
 			$device->setType('action');
 			$device->setSubType('message');
@@ -455,7 +510,7 @@ class pushbullet extends eqLogic {
 				$cmd->remove();
 			}
 			else if ($cmd->getConfiguration('deviceid') == 'all') {
-				$cmd->setConfiguration('pushdeviceids', implode(",", $arrayAllDevices));
+				$cmd->setConfiguration('pushdeviceids', implode(',', $arrayAllDevices));
 				$cmd->save();
 			}
 		}
@@ -464,28 +519,21 @@ class pushbullet extends eqLogic {
   public function getDevices() {
 		// sendRequest 
 		$return = array();
-		$curl = curl_init();
-		curl_setopt($curl, CURLOPT_URL, PUSHBULLETURLDEVICES);
-		curl_setopt($curl, CURLOPT_HTTPGET, true);
-		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($curl, CURLOPT_USERPWD, $this->getConfiguration('token') . ":");
-		curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-		
-		$curlData = json_decode(curl_exec($curl), true);
+		list($curlData,$curlerrno) = $this->doCurlRequest(PUSHBULLETURLDEVICES, 'GET');
+
+		$curlData = json_decode($curlData, true);
+
 		if ($curlData) {
-			foreach ($curlData["devices"] as $device) {
+			foreach ($curlData['devices'] as $device) {
 				if ($device['active'] == 'true') {
-					$return[] = array("name" => $device["nickname"], "deviceid" => $device["iden"]);
+					$return[] = array('name' => $device['nickname'], 'deviceid' => $device['iden']);
 				}
 			}
 		}
 		else {
 			log::add('pushbullet', 'error', '('.$this->getId().') error on GET DEVICES');
-			throw new Exception(__('Erreur Pushbullet GetDevices : '.curl_error($curl), __FILE__));
+			//throw new Exception(__('Erreur Pushbullet GetDevices : '.curl_error($curl), __FILE__));
 		}
-		curl_close($curl);
 		log::add('pushbullet', 'debug', '('.$this->getId().') GET DEVICES result '.serialize($return));
 		return $return;
   }
@@ -507,27 +555,16 @@ class pushbullet extends eqLogic {
 		log::add('pushbullet', 'debug', '('.$this->getId().') CREATEJEEDOMDEVICE '.$jeedomDeviceName);
 		$arrayData = array('nickname' => $jeedomDeviceName, 'type' => 'stream');
 		
-		// sendRequest 
-		$curl = curl_init();
-		curl_setopt($curl, CURLOPT_URL, PUSHBULLETURLDEVICES);
-		curl_setopt($curl, CURLOPT_POST, true);
-		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($curl, CURLOPT_USERPWD, $this->getConfiguration('token') . ":");
-		curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-		curl_setopt($curl, CURLOPT_POSTFIELDS, $arrayData);
-		
-		$curlData = json_decode(curl_exec($curl), true);
+		list($curlData,$curlerrno) = $this->doCurlRequest(PUSHBULLETURLDEVICES, 'POST', $arrayData);
+		$curlData = json_decode($curlData, true);
 		if ($curlData) {
-			$return = array("deviceid" => $curlData["iden"], "timestamp" => $curlData["modified"]);
+			$return = array('deviceid' => $curlData['iden'], 'timestamp' => $curlData['modified']);
 		}
 		else {
 			$return = array();
 			log::add('pushbullet', 'error', '('.$this->getId().') error on CREATEJEEDOMDEVICE');
-			throw new Exception(__('Erreur Pushbullet CreateJeedomDevice : '.curl_error($curl), __FILE__));
+			//throw new Exception(__('Erreur Pushbullet CreateJeedomDevice : '.curl_error($curl), __FILE__));
 		}
-		curl_close($curl);
 		
 		return $return;
   }
@@ -536,51 +573,29 @@ class pushbullet extends eqLogic {
 		log::add('pushbullet', 'debug', '('.$this->getId().') UPDATEJEEDOMDEVICE '.$jeedomDeviceName);
 		
 		$arrayData = array('nickname' => $jeedomDeviceName);
-		
-		// sendRequest 
-		$curl = curl_init();
-		curl_setopt($curl, CURLOPT_URL, PUSHBULLETURLDEVICES.'/'.$deviceId);
-		curl_setopt($curl, CURLOPT_POST, true);
-		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($curl, CURLOPT_USERPWD, $this->getConfiguration('token') . ":");
-		curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-		curl_setopt($curl, CURLOPT_POSTFIELDS, $arrayData);
-		
-		$curlData = json_decode(curl_exec($curl), true);
+		list($curlData,$curlerrno) = $this->doCurlRequest(PUSHBULLETURLDEVICES.'/'.$deviceId, 'POST', $arrayData);
+		$curlData = json_decode($curlData, true);
 		if ($curlData) {
-			$return = array("deviceid" => $curlData["iden"], "timestamp" => $curlData["modified"]);
+			$return = array('deviceid' => $curlData['iden'], 'timestamp' => $curlData['modified']);
 		}
 		else {
 			$return = array();
 			log::add('pushbullet', 'error', '('.$this->getId().') error on UPDATEJEEDOMDEVICE');
-			throw new Exception(__('Erreur Pushbullet UpdateJeedomDevice : '.curl_error($curl), __FILE__));
+			//throw new Exception(__('Erreur Pushbullet UpdateJeedomDevice : '.curl_error($curl), __FILE__));
 		}
-		curl_close($curl);
 		
 		return $return;
   }
 
   public function removeJeedomDevice($jeedomDeviceId) {
 		log::add('pushbullet', 'debug', '('.$this->getId().') REMOVEJEEDOMDEVICE '.$jeedomDeviceId);
-		
-		// sendRequest 
-		$curl = curl_init();
-		curl_setopt($curl, CURLOPT_URL, PUSHBULLETURLDEVICES.'/'.$jeedomDeviceId);
-		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
-		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($curl, CURLOPT_USERPWD, $this->getConfiguration('token') . ":");
-		curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-		curl_exec($curl);
-		curl_close($curl);
+
+		list($curlData,$curlerrno)  = $this->doCurlRequest(PUSHBULLETURLDEVICES.'/'.$jeedomDeviceId.'/'.$deviceId, 'DELETE');
 		
   }
 	
 	function getJeedomDeviceId() {
-		$jeedomDeviceId = "";
+		$jeedomDeviceId = '';
 		foreach ($this->getCmd() as $cmd) {
 			if ($cmd->getConfiguration('isPushChannel') == 1) {
 				$jeedomDeviceId = $cmd->getConfiguration('deviceid');
@@ -592,27 +607,16 @@ class pushbullet extends eqLogic {
 	
   public function testToken($token) {
 		
-		// sendRequest 
-		$curl = curl_init();
-		curl_setopt($curl, CURLOPT_URL, PUSHBULLETME);
-		curl_setopt($curl, CURLOPT_HTTPGET, true);
-		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($curl, CURLOPT_USERPWD, $token . ":");
-		curl_setopt($curl, CURLOPT_FAILONERROR, true);
-		curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-		$curlData = curl_exec($curl);
-		if (curl_errno($curl)) {
-			curl_close($curl);
+		list($curlData,$curlerrno) = $this->doCurlRequest(PUSHBULLETME, 'GET');
+
+		if ($curlerrno) {
 			return false;
 		}
-		curl_close($curl);
 		return true;
-    }
+  }
 	
-    public function getShowOnChild() {
-        return true;
+  public function getShowOnChild() {
+    return true;
   }
 
 	/*
@@ -682,7 +686,7 @@ class pushbullet extends eqLogic {
 
     $result = exec('nohup ' . $cmd . ' > /dev/null 2>&1 &');
     if (strpos(strtolower($result), 'error') !== false || strpos(strtolower($result), 'traceback') !== false) {
-        log::add('sms', 'error', $result);
+        log::add('pushbullet', 'error', $result);
         return false;
     }
 
@@ -756,6 +760,7 @@ class pushbulletCmd extends cmd {
 
     /*     * *********************Methode d'instance************************* */
     public function execute($_options = null) {
+    	log::add('pushbullet', 'debug', 'execute '.serialize($_options));
       $eqLogic_pushbullet = $this->getEqLogic();
 		
 			if ($this->getConfiguration('isPushChannel') == 1) {
@@ -765,41 +770,112 @@ class pushbulletCmd extends cmd {
 				if ($_options === null) {
 					throw new Exception(__('Les options de la fonction ne peuvent etre null', __FILE__));
 				}
-				if ($_options['message'] == '' && $_options['title'] == '') {
-					throw new Exception(__('Le message et le sujet ne peuvent être vide', __FILE__));
-				}
 				/*
 				Depuis la 2.12, on retire le titre par defaut
 				if ($_options['title'] == '') {
 					$_options['title'] = __('[Jeedom] - Notification', __FILE__);
 				}
 				*/
+				// Case 1 : file from CAMERA plugin
+				if ($_options['files'] && is_array($_options['files']) && is_file($_options['files'][0])) {
+					log::add('pushbullet', 'debug', 'file detected');
+					$file = $_options['files'][0];
+
+					 // obtenir le type mime
+					$finfo = new finfo(FILEINFO_MIME, '/usr/share/misc/magic');
+
+					/* Récupère le mime-type d'un fichier spécifique */
+					$filetype = $finfo->file($file);
+
+
+					$arrayData = array('file_name' => basename($file), 'file_type' => $filetype);
+					log::add('pushbullet', 'debug', 'R');
+					list($curlData,$curlerrno) = $eqLogic_pushbullet->doCurlRequest(PUSHBULLETURLUPLOADREQ, 'POST', $arrayData);
+					$curlData = json_decode($curlData, true);
+
+					if ($curlerrno) {
+						log::add('pushbullet', 'error', 'Erreur requête d\'upload');
+						throw new Exception(__('Erreur requête pushbullet', __FILE__));
+						
+					}
+
+					$uploadUrl = $curlData['upload_url'];
+					$fileUrl = $curlData['file_url'];
+
+					// envoi du fichier
+
+					$cfile = curl_file_create($file, $filetype, 'file');
+					$arrayData = array('file' => $cfile);
+
+					list($curlData,$curlerrno) = $eqLogic_pushbullet->doCurlRequest($uploadUrl, 'POST', $arrayData, 'file', false);
+
+					if ($curlerrno) {
+						log::add('pushbullet', 'error', 'Erreur d\'envoi de fichier');
+						throw new Exception(__('Erreur requête pushbullet', __FILE__));					
+					}
+
+					$arrayData = array('type' => 'file', 
+														 'body' => '', 
+														 'file_name' => basename($file),
+														 'file_type' => $filetype,
+														 'file_url' => $fileUrl);
+
+					$jeedomDeviceId = $eqLogic_pushbullet->getJeedomDeviceId();
+
+					if ($jeedomDeviceId) {
+						$arrayData['source_device_iden'] = $jeedomDeviceId;
+					}
+
+					if ($this->getConfiguration('deviceid') != 'all') {
+							$arrayData['device_iden'] = $this->getConfiguration('deviceid');
+					}
+
+					list($curlData,$curlerrno) = $eqLogic_pushbullet->doCurlRequest(PUSHBULLETURL, 'POST', $arrayData);
+				}
+				// Case 2 : URL
+				else if ($_options['title'] && filter_var($_options['title'], FILTER_VALIDATE_URL)) {
+					$testimage = getimagesize($_options['title']);
+					if ($testimage['mime']) {
+						$arrayData = array('type' => 'file', 
+															 'body' => '', 
+															 'file_name' => basename('test'),
+															 'file_type' => $testimage['mime'],
+															 'file_url' => $_options['title']);
+
+						$jeedomDeviceId = $eqLogic_pushbullet->getJeedomDeviceId();
+
+						if ($jeedomDeviceId) {
+							$arrayData['source_device_iden'] = $jeedomDeviceId;
+						}
+
+						if ($this->getConfiguration('deviceid') != 'all') {
+								$arrayData['device_iden'] = $this->getConfiguration('deviceid');
+						}
+
+						list($curlData,$curlerrno) = $eqLogic_pushbullet->doCurlRequest(PUSHBULLETURL, 'POST', $arrayData);
+
+					}
+				}
+				// Case 3 : notification classique
+				else {
+					if ($_options['message'] == '' && $_options['title'] == '') {
+						throw new Exception(__('Le message et le sujet ne peuvent être vide', __FILE__));
+					}
 				// prepare data
-				$arrayData = array("type" => "note", "title" => $_options['title'], "body" => $_options['message']);
-				$jeedomDeviceId = $eqLogic_pushbullet->getJeedomDeviceId();
-				if ($jeedomDeviceId) {
-					$arrayData["source_device_iden"] = $jeedomDeviceId;
-				}
 
-				log::add('pushbullet', 'debug', 'send to pushbullet '.serialize($arrayData));
+					$arrayData = array('type' => 'note', 'title' => $_options['title'], 'body' => $_options['message']);
+					$jeedomDeviceId = $eqLogic_pushbullet->getJeedomDeviceId();
 
-				// sendRequest 
-				$curl = curl_init();
-				curl_setopt($curl, CURLOPT_URL, PUSHBULLETURL);
-				curl_setopt($curl, CURLOPT_POST, true);
-				curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-				curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-				curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-				curl_setopt($curl, CURLOPT_USERPWD, $eqLogic_pushbullet->getConfiguration('token') . ":");
-				curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-				
-				if ($this->getConfiguration('deviceid') != 'all') {
-						$arrayData["device_iden"] = $this->getConfiguration('deviceid');
+					if ($jeedomDeviceId) {
+						$arrayData['source_device_iden'] = $jeedomDeviceId;
+					}
+
+					if ($this->getConfiguration('deviceid') != 'all') {
+							$arrayData['device_iden'] = $this->getConfiguration('deviceid');
+					}
+
+					list($curlData,$curlerrno) = $eqLogic_pushbullet->doCurlRequest(PUSHBULLETURL, 'POST', $arrayData);
 				}
-				curl_setopt($curl, CURLOPT_POSTFIELDS, $arrayData);
-				curl_exec($curl);
-				
-				curl_close($curl);
 			}
     }
 	

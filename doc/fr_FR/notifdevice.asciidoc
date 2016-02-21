@@ -2,8 +2,8 @@
 
 Il est possible d'envoyer une notification depuis Jeedom
 
-* *à un device particulier d'un équipement
-* *à tous les devices d'un équipement
+* à un device particulier d'un équipement
+* à tous les devices d'un équipement
 
 === Notification manuelle
 
@@ -16,3 +16,22 @@ image::../images/pushbullet_dash.png[]
 Il est possible d'envoyer une notification dans le déroulement d'un scénario. Pour cela, il suffit d'invoquer l'action correspondant au device vers lequel la notification doit être envoyée.
 
 image::../images/pushbullet_scenario.png[]
+
+=== Envoie d'une image
+
+Il est possible d'envoyer une image depuis Jeedom vers Pushbullet. Pour cela, il suffit de mettre l'URL de l'image dans le champs "titre" de la notification. Si l'URL pointe vers une image, le plugin le reconnaitra automatiquement et traitera la notification comme un envoi d'image. Sinon, la notification sera traitée comme une notification classique. 
+
+image::../images/pushbullet_dash_url.png[]
+
+=== Intégration dans d'autres plugins
+
+==== Plugin Camera
+
+Le plugin Camera permet de définir un équipement qui sert à recevoir les captures d'image de la caméra. A cet endroit, il est possible de définir un équipement Pushbullet. Ainsi, les captures seront envoyés à cet équipement pushbullet.
+
+image::../images/pushbullet_camera.png[]
+
+Utilisations possibles:
+
+* créer un scénario qui appelle la commande "envoyer une capture" de l'objet caméra
+* créer une interaction associée à la commande "envoyer une capture" de l'objet caméra, ce qui permet de demander une capture en envoyant depuis Pushbullet une notification à Jeedom

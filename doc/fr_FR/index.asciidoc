@@ -22,3 +22,6 @@ include::notifjeedom.asciidoc[]
 == Utilisation avec des interactions
 include::interactions.asciidoc[]
 
+== Développeurs : intégration avec d'autres plugins
+include::developer.asciidoc[]
+
