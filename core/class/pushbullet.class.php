@@ -26,6 +26,13 @@ define('PUSBULLET_COMMAND_RAPPEL_2', 'p');
 define('PUSHBULLETME', 'https://api.pushbullet.com/v2/users/me');
 define('PUSHBULLETURLUPLOADREQ', 'https://api.pushbullet.com/v2/upload-request');
 
+if (!function_exists('curl_file_create')) {
+    function curl_file_create($filename, $mimetype = '', $postname = '') {
+        return "@$filename;filename="
+            . ($postname ?: basename($filename))
+            . ($mimetype ? ";type=$mimetype" : '');
+    }
+}
 
 class pushbullet extends eqLogic {
 
