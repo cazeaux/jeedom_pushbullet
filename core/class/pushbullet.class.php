@@ -626,6 +626,19 @@ class pushbullet extends eqLogic {
     return true;
   }
 
+	public static function event() {
+		$cmd = pushbulletCmd::byId(init('id'));
+		if (!is_object($cmd)) {
+			throw new Exception(__('Commande ID pushbullet inconnu : ', __FILE__) . init('id'));
+		}
+		if ($cmd->getEqLogic()->getEqType_name() != 'pushbullet') {
+			throw new Exception(__('Cette commande n\'est pas de type pushbullet : ', __FILE__) . init('id'));
+		}
+		$_options['title'] = init('title');
+		$_options['message'] = init('message');
+		$cmd->execCmd($_options);
+	}
+
 	/*
     public static function cron() {
       foreach (eqLogic::byType('pushbullet') as $pushbullet) {
