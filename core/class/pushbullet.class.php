@@ -328,7 +328,7 @@ class pushbullet extends eqLogic {
 			}
 		}
 		else {
-			log::add('pushbullet', 'error', '('.$this->getId().') curl error');
+			log::add('pushbullet', 'error', '('.$this->getId().') curl error ('.$curlerrno.')');
 			//throw new Exception(__('Erreur Pushbullet Cron : '.curl_error($curl), __FILE__));
 		}
 
