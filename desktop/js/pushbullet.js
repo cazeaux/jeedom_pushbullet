@@ -21,6 +21,9 @@ function addCmdToTable(_cmd) {
     }
     var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">';
     tr += '<td>';
+    tr += '<span>'+_cmd.id+'</span>';
+    tr += '</td>';
+    tr += '<td>';
     tr += '<span>'+_cmd.type+'</span>';
     tr += '</td>';
     tr += '<td>';
