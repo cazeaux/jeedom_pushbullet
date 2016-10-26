@@ -75,9 +75,8 @@ $eqLogics = eqLogic::byType('pushbullet')
                 <div class="form-group">
 					<label class="col-sm-3 control-label"></label>
 					<div class="col-sm-9">
-						<input type="checkbox" class="eqLogicAttr bootstrapSwitch" data-label-text="{{Activer}}" data-l1key="isEnable" checked/>
-						<input type="checkbox" class="eqLogicAttr bootstrapSwitch" data-label-text="{{Visible}}" data-l1key="isVisible" checked/>
-					</div>
+					                <input type="checkbox" class="eqLogicAttr" data-l1key="isEnable" checked/>{{Activer}}
+					                <input type="checkbox" class="eqLogicAttr" data-l1key="isVisible" checked/>{{Visible}}					</div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-3 control-label">{{Token Pushbullet}}</label>
@@ -94,25 +93,25 @@ $eqLogics = eqLogic::byType('pushbullet')
                 <div class="form-group">
                     <label class="col-sm-3 control-label">{{Activer l'envoi de commandes vers jeedom via cet équipement}}</label>
                     <div class="col-sm-9">
-                        <input type="checkbox" class="eqLogicAttr bootstrapSwitch" data-label-text="{{Activé}}" data-l1key="configuration" data-l2key="isPushEnabled" checked/>
+						<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="isPushEnabled" checked/>{{Activé}}
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-3 control-label">{{Envoyer la réponses des interactions au device qui a émis la commande (si activé, ce paramètre se substitue au choix fait au niveau de chaque device)}}</label>
                     <div class="col-sm-9">
-                        <input type="checkbox" class="eqLogicAttr bootstrapSwitch" data-label-text="{{Activé}}" data-l1key="configuration" data-l2key="sendBackReponseToSource" checked/>
+						<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="sendBackReponseToSource" checked/>{{Activé}}
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-3 control-label">{{Activer les interactions sur cet équipement}}</label>
                     <div class="col-sm-9">
-                        <input type="checkbox" class="eqLogicAttr bootstrapSwitch" data-label-text="{{Activé}}" data-l1key="configuration" data-l2key="isInteractionEnabled" checked/>
+						<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="isInteractionEnabled" checked/>{{Activé}}
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-3 control-label">{{Inclure la commande reçue dans les réponses envoyées après exécution d'une interaction}}</label>
                     <div class="col-sm-9">
-                        <input type="checkbox" class="eqLogicAttr bootstrapSwitch" data-label-text="{{Activé}}" data-l1key="configuration" data-l2key="dismissInitialCommandeInReply" />
+						<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="dismissInitialCommandeInReply" checked/>{{Activé}}
                     </div>
                 </div>
                 <div class="form-group">
