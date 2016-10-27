@@ -156,7 +156,7 @@ $eqLogics = eqLogic::byType('pushbullet')
         <table id="table_cmd" class="table table-bordered table-condensed">
             <thead>
                 <tr>
-                    <th>{{Id}}</th><th>{{Type}}</th><th>{{Nom du device}}</th><th>{{Paramètres}}</th>
+                    <th>{{Id}}</th><th>{{Type}}</th><th>{{Nom du device}}</th><th>{{Paramètres}}</th><th>{{Actions}}</th>
                 </tr>
             </thead>
             <tbody>
