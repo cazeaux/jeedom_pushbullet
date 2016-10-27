@@ -75,8 +75,13 @@ $eqLogics = eqLogic::byType('pushbullet')
                 <div class="form-group">
 					<label class="col-sm-3 control-label"></label>
 					<div class="col-sm-9">
-					                <input type="checkbox" class="eqLogicAttr" data-l1key="isEnable" checked/>{{Activer}}
-					                <input type="checkbox" class="eqLogicAttr" data-l1key="isVisible" checked/>{{Visible}}					</div>
+						<label class="checkbox-inline">
+			                <input type="checkbox" class="eqLogicAttr" data-l1key="isEnable" checked/>{{Activer}}
+						</label>
+						<label class="checkbox-inline">
+			                <input type="checkbox" class="eqLogicAttr" data-l1key="isVisible" checked/>{{Visible}}
+						</label>
+					</div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-3 control-label">{{Token Pushbullet}}</label>
@@ -93,31 +98,41 @@ $eqLogics = eqLogic::byType('pushbullet')
                 <div class="form-group">
                     <label class="col-sm-3 control-label">{{Activer l'envoi de commandes vers jeedom via cet équipement}}</label>
                     <div class="col-sm-9">
-						<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="isPushEnabled" checked/>{{Activé}}
+						<label class="checkbox-inline">
+							<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="isPushEnabled" checked/>{{Activer}}
+						</label>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">{{Envoyer la réponses des interactions au device qui a émis la commande (si activé, ce paramètre se substitue au choix fait au niveau de chaque device)}}</label>
+                    <label class="col-sm-3 control-label">{{Envoyer la réponses des interactions au device qui a émis la commande (si Activer, ce paramètre se substitue au choix fait au niveau de chaque device)}}</label>
                     <div class="col-sm-9">
-						<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="sendBackReponseToSource" checked/>{{Activé}}
+						<label class="checkbox-inline">
+							<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="sendBackReponseToSource" checked/>{{Activer}}
+						</label>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-3 control-label">{{Activer les interactions sur cet équipement}}</label>
                     <div class="col-sm-9">
-						<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="isInteractionEnabled" checked/>{{Activé}}
+						<label class="checkbox-inline">
+							<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="isInteractionEnabled" checked/>{{Activer}}
+						</label>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-3 control-label">{{Inclure la commande reçue dans les réponses envoyées après exécution d'une interaction}}</label>
                     <div class="col-sm-9">
-						<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="dismissInitialCommandeInReply" checked/>{{Activé}}
+						<label class="checkbox-inline">
+							<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="dismissInitialCommandeInReply"/>{{Activer}}
+						</label>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-3 control-label">{{Ecouter les push entrant sur jeedom "envoyés à tous" (en plus de ceux explicitement envoyés à Jeedom)}}</label>
                     <div class="col-sm-9">
-                        <input type="checkbox" class="eqLogicAttr bootstrapSwitch" data-label-text="{{Activé}}" data-l1key="configuration" data-l2key="listenAllPushes" />
+						<label class="checkbox-inline">
+							<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="listenAllPushes" />{{Activer}}
+						</label>
                     </div>
                 </div>
             </fieldset> 
