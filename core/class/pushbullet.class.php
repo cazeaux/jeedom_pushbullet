@@ -379,7 +379,7 @@ class pushbullet extends eqLogic {
     }
 	
 
-	public function postUpdate() {
+	public function postAjax() {
  		log::add('pushbullet', 'debug', '('.$this->getId().') POSTUPDATE');
 		$arrayExistingCmd = array();
 		$arrayExistingCmdNames = array();
@@ -476,8 +476,6 @@ class pushbullet extends eqLogic {
 				foreach ($arrayEquipmentCmd as $cmd) {
 					if ($cmd->GetConfiguration('deviceid') == $deviceEntry['deviceid'] && $cmd->GetName() != $deviceEntry['name']) {
 						$name = $deviceEntry['name'];
-						$oldId = $cmd->getId();
-						$cmd->remove();
 
 						if ($arrayExistingCmdNames_countValues[$name] > 0) {
 							$name = $name . " (".$arrayExistingCmdNames_countValues[$name].")";
@@ -486,16 +484,8 @@ class pushbullet extends eqLogic {
 						$arrayExistingCmdNames[] = $deviceEntry['name'];
 						$arrayExistingCmdNames_countValues = array_count_values($arrayExistingCmdNames);
 
-						$device = new pushbulletCmd();
-						$device->setName($name);
-						//$device->setId($oldId);
-						$device->setEqLogic_id($this->id);
-						$device->setConfiguration('deviceid', $deviceEntry['deviceid']);
-						$device->setUnite('');
-						$device->setType('action');
-						$device->setSubType('message');
-						$device->setIsHistorized(0);
-						$device->save();
+						$cmd->setName($name);
+						$cmd->save();
 
 						log::add('pushbullet', 'debug', 'UPDATE NAME for '.$deviceEntry['name']);
 					}
