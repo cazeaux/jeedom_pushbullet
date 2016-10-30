@@ -111,7 +111,7 @@ class pushbullet extends eqLogic {
 		$pushbullet = pushbullet::byId($_options['pushbullet_id']);
 		log::add('pushbullet', 'debug', 'activate reminder '.serialize($_options));
     
-    if (is_object($pushbullet)) {
+	    if (is_object($pushbullet)) {
 			foreach ($pushbullet->getCmd() as $cmd) {
 				if($cmd->getConfiguration('isPushChannel')) {
 					log::add('pushbullet', 'debug', '('.$pushbullet->getId().') send event reminder '.$_options['body']);
@@ -382,6 +382,7 @@ class pushbullet extends eqLogic {
 	public function postUpdate() {
  		log::add('pushbullet', 'debug', '('.$this->getId().') POSTUPDATE');
 		$arrayExistingCmd = array();
+		$arrayExistingCmdNames = array();
 		$jeedomDeviceExitsAtPushbullet = 0;
 		$bCreatePushDevice = true;
 		$bIsPushEnabled = $this->getConfiguration('isPushEnabled');
@@ -392,8 +393,9 @@ class pushbullet extends eqLogic {
 		}
 	
 		
-		// On récupère les commandes déjà créées, dans le cas d'un UPDATE. Vide s'il s'agit d'une première création
 		$arrayEquipmentCmd = $this->getCmd();
+
+		// On récupère les commandes déjà créées, dans le cas d'un UPDATE. Vide s'il s'agit d'une première création
 		foreach ($arrayEquipmentCmd as $cmd) {
 			if ($cmd->GetConfiguration('isPushChannel')) {
 				$jeedomDeviceId = $cmd->getConfiguration('deviceid');
@@ -402,12 +404,16 @@ class pushbullet extends eqLogic {
 				}
 				else {
 					$arrayExistingCmd[$jeedomDeviceId] = 1;
+					$arrayExistingCmdNames[] = $cmd->getName();
 				}
 			}
 			else {
 				$arrayExistingCmd[$cmd->GetConfiguration('deviceid')] = 1;
+				$arrayExistingCmdNames[] = $cmd->getName();
 			}
 		}
+
+		$arrayExistingCmdNames_countValues = array_count_values($arrayExistingCmdNames);
 		
 		// A ce stade on a le jeedomDeviceName (ou celui par défaut si non défini) et le jeedomDeviceId s'il est déjà connu
 
@@ -417,6 +423,21 @@ class pushbullet extends eqLogic {
 		// Pour stocker les ID de tous les devices SAUF le device de push
 		$arrayAllDevices = array();
 		
+		// On marque les commandes à conserver (si ça reste à 1, il sera à supprimer)
+		foreach ($arrayDevices as $deviceEntry) {
+			if (isset($arrayExistingCmd[$deviceEntry['deviceid']])) {
+				$arrayExistingCmd[$deviceEntry['deviceid']] = -1;
+			}
+		}
+
+		// On supprime les commandes obsolètes
+		foreach ($arrayEquipmentCmd as $cmd) {
+			if ($arrayExistingCmd[$cmd->GetConfiguration('deviceid')] == 1 && $cmd->GetConfiguration('deviceid') != 'all' && !$cmd->GetConfiguration('isPushChannel')) {
+				log::add('pushbullet', 'debug', '('.$this->getId().') POSTUPDATE remove cmd '.$cmd->getName());
+				$cmd->remove();
+			}
+		}
+
 		// on crée les commandes des devices PUSHBULLET si elles n'existent pas encore
 		foreach ($arrayDevices as $deviceEntry) {
 			log::add('pushbullet', 'debug', '('.$this->getId().') POSTUPDATE '.$deviceEntry['name']);
@@ -428,9 +449,19 @@ class pushbullet extends eqLogic {
 			// Device normaux (type action)
 			if (!isset($arrayExistingCmd[$deviceEntry['deviceid']]) && $deviceEntry['deviceid'] != $jeedomDeviceId) {
 				// On marque le device comme étant valide.
-				log::add('pushbullet', 'debug', '('.$this->getId().') POSTUPDATE create new jeedom CMD with '.__($deviceEntry['name'], __FILE__));
+				log::add('pushbullet', 'debug', '('.$this->getId().') POSTUPDATE create new jeedom CMD with '.$deviceEntry['name']);
+
+				$name = $deviceEntry['name'];
+
+				if ($arrayExistingCmdNames_countValues[$name] > 0) {
+					$name = $name . " (".$arrayExistingCmdNames_countValues[$name].")";
+				}
+
+				$arrayExistingCmdNames[] = $deviceEntry['name'];
+				$arrayExistingCmdNames_countValues = array_count_values($arrayExistingCmdNames);
+
 				$device = new pushbulletCmd();
-				$device->setName(__($deviceEntry['name'], __FILE__));
+				$device->setName($name);
 				$device->setEqLogic_id($this->id);
 				$device->setConfiguration('deviceid', $deviceEntry['deviceid']);
 				$device->setUnite('');
@@ -438,6 +469,37 @@ class pushbullet extends eqLogic {
 				$device->setSubType('message');
 				$device->setIsHistorized(0);
 				$device->save();
+			}
+			// Device existe déjà, on vérifie s'il faut changer le nom
+
+			else if (isset($arrayExistingCmd[$deviceEntry['deviceid']]) && $deviceEntry['deviceid'] != $jeedomDeviceId){
+				foreach ($arrayEquipmentCmd as $cmd) {
+					if ($cmd->GetConfiguration('deviceid') == $deviceEntry['deviceid'] && $cmd->GetName() != $deviceEntry['name']) {
+						$name = $deviceEntry['name'];
+						$oldId = $cmd->getId();
+						$cmd->remove();
+
+						if ($arrayExistingCmdNames_countValues[$name] > 0) {
+							$name = $name . " (".$arrayExistingCmdNames_countValues[$name].")";
+						}
+
+						$arrayExistingCmdNames[] = $deviceEntry['name'];
+						$arrayExistingCmdNames_countValues = array_count_values($arrayExistingCmdNames);
+
+						$device = new pushbulletCmd();
+						$device->setName($name);
+						//$device->setId($oldId);
+						$device->setEqLogic_id($this->id);
+						$device->setConfiguration('deviceid', $deviceEntry['deviceid']);
+						$device->setUnite('');
+						$device->setType('action');
+						$device->setSubType('message');
+						$device->setIsHistorized(0);
+						$device->save();
+
+						log::add('pushbullet', 'debug', 'UPDATE NAME for '.$deviceEntry['name']);
+					}
+				}
 			}
 			// Device spécifique pour le push (type info)
 			else if ($deviceEntry['deviceid'] == $jeedomDeviceId) {
@@ -451,11 +513,7 @@ class pushbullet extends eqLogic {
 
 					// si push désactivé, on supprime le device
 				}
-				
 			}
-			
-			$arrayExistingCmd[$deviceEntry['deviceid']] = -1;
-			
 		}
 
 		// Création du device PUSH s'il n'existe pas encore
@@ -473,7 +531,7 @@ class pushbullet extends eqLogic {
 			}
 			log::add('pushbullet', 'debug', '('.$this->getId().') POSTUPDATE create jeedom device CMD');
 			$device = new pushbulletCmd();
-			$device->setName(__($jeedomDeviceName, __FILE__));
+			$device->setName($jeedomDeviceName);
 			$device->setEqLogic_id($this->id);
 			$device->setConfiguration('deviceid', $jeedomDeviceId);
 			$device->setConfiguration('isPushChannel', '1');
@@ -510,13 +568,9 @@ class pushbullet extends eqLogic {
 			$device->save();
 		}
 		
-		// On supprime les commandes en trop et on update le device ALL
+		// On update le device ALL
 		foreach ($arrayEquipmentCmd as $cmd) {
-			if ($arrayExistingCmd[$cmd->GetConfiguration('deviceid')] == 1 && $cmd->GetConfiguration('deviceid') != 'all' && !$cmd->GetConfiguration('isPushChannel')) {
-				log::add('pushbullet', 'debug', '('.$this->getId().') POSTUPDATE remove cmd '.$cmd->getName());
-				$cmd->remove();
-			}
-			else if ($cmd->getConfiguration('deviceid') == 'all') {
+			if ($cmd->getConfiguration('deviceid') == 'all') {
 				$cmd->setConfiguration('pushdeviceids', implode(',', $arrayAllDevices));
 				$cmd->save();
 			}
