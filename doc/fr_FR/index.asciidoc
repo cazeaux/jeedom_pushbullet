@@ -1,13 +1,12 @@
-= Pushbullet
+== Pushbullet
 
-NOTE: L'utilisation de ce plugin requiert de créer un compte (gratuit) sur http://www.pushbullet.com
+=== Description
+include::description.asciidoc[]
 
-Plugin permettant de faire interagir le service Pushbullet avec Jeedom.
-Les principales fonctionnalités sont :
+=== Configuration
 
-* envoi de notifications depuis jeedom vers un device pushbullet
-* envoi de commandes depuis pushbullet vers jeedom, avec support des interactions jeedom
 
+=== FAQ
 
 == Installation et configuration initiale
 include::installation.asciidoc[]
