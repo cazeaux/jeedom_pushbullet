@@ -4,23 +4,10 @@
 include::description.asciidoc[]
 
 === Configuration
-
+include::configuration.asciidoc[]
 
 === FAQ
+include::faq.asciidoc[]
 
 == Installation et configuration initiale
 include::installation.asciidoc[]
-
-== Envoi de notification vers un device
-include::notifdevice.asciidoc[]
-
-
-== Envoi de notification vers Jeedom
-include::notifjeedom.asciidoc[]
-
-== Utilisation avec des interactions
-include::interactions.asciidoc[]
-
-== Développeurs : intégration avec d'autres plugins
-include::developer.asciidoc[]
-
