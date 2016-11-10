@@ -8,7 +8,7 @@
     <author>Stéphane Cazeaux</author>
     <installation>Aucune</installation>
     <require>2.0</require>
-    <version>2.82</version>
+    <version>2.83</version>
     <category>communication</category>
     <hasOwnDeamon>1</hasOwnDeamon>
 </info>

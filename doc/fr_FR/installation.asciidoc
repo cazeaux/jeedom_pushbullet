@@ -39,7 +39,7 @@ L'installation du plugin passe par le market, comme tous les plugins. Après ins
 
 Aller dans la page du plugin, dans *Plugins > Communication > Pushbullet*
 
-A l'ajout, un nom est demandé : mettre le nom souhaité. Après validation, la page des paramètres apparaît:
+A l'ajout, un nom est demandé : mettre le nom souhaité. Après validation, la page des paramètres apparaît :
 
 _Paramètres équipement Pushbullet_
 [cols="2"]
