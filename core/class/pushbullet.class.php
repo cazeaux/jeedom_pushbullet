@@ -236,7 +236,7 @@ class pushbullet extends eqLogic {
 							// Lancement des interactions
 							if ($this->getConfiguration('isInteractionEnabled'))
 							{
-								$reply = interactQuery::tryToReply(trim($eventBody), array());
+								$reply = interactQuery::tryToReply(trim($eventBody), array())['reply'];
 								log::add('pushbullet', 'debug', '('.$this->getId().') interaction reply : '.$reply);
 								if (trim($reply) != '') {
 									$messageBody = '';
