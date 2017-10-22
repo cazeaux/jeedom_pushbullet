@@ -70,7 +70,7 @@ def daemonize():
 		pid = os.fork()
 		if pid != 0:
 			sys.exit(0)
-	except OSError, e:
+	except OSError as e:
 		raise RuntimeError("1st fork failed: %s [%d]" % (e.strerror, e.errno))
 
 	os.setsid() 
@@ -82,7 +82,7 @@ def daemonize():
 		pid = os.fork() 
 		if pid != 0:
 			sys.exit(0)
-	except OSError, e:
+	except OSError as e:
 		raise RuntimeError("2nd fork failed: %s [%d]" % (e.strerror, e.errno))
 
 	dev_null = file('/dev/null', 'r')
@@ -102,7 +102,8 @@ def logger_init(name, debug):
 	
 	if debug:
 		loglevel = "DEBUG"
-		handler = logging.StreamHandler()
+		# handler = logging.StreamHandler()
+		handler = logging.FileHandler(logfile)
 	else:
 		handler = logging.FileHandler(logfile)
 					
@@ -140,7 +141,7 @@ def main():
 	is_alive = 0
 
 	API_KEY = sys.argv[1]
-	logger = logger_init('pushbullet', False)
+	logger = logger_init('pushbullet', True)
 	
 	logger.debug("Check PID file")
 	
@@ -158,7 +159,7 @@ def main():
 	try:
 		logger.debug("Write PID file")
 		file(pidfile, 'w').write("pid\n")
-	except IOError, e:
+	except IOError as e:
 		#logger.error("Line: " + _line())
 		logger.error("Unable to write PID file: %s [%d]" % (e.strerror, e.errno))
 		raise SystemExit("Unable to write PID file: %s [%d]" % (e.strerror, e.errno))
