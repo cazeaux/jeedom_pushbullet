@@ -145,7 +145,15 @@ def main():
 	
 	logger.debug("Check PID file")
 	
-	pidfile = os.path.dirname(os.path.realpath(__file__))+'/../../../../tmp/pushbullet.'+API_KEY+'.pid'
+	path = os.path.dirname(os.path.realpath(__file__))+'/../../../../tmp'
+
+	try: 
+	    os.makedirs(path)
+	except OSError:
+	    if not os.path.isdir(path):
+	        raise
+
+	pidfile = path + '/pushbullet.'+API_KEY+'.pid'
 	createpid = True
 
 	logger.debug("PID file '" + pidfile + "'")
