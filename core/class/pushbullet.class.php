@@ -38,7 +38,6 @@ class pushbullet extends eqLogic {
 
 
 		public function doCurlRequest ($_url, $_method, $_data=null, $_dataType = 'json', $_useAuth=true) {
-
 			log::add('pushbullet', 'debug', '('.$this->getId().') curl request '.$_method.' '.$_url.' ('.serialize($_data).')');
 			$curl = curl_init();
 		
@@ -67,7 +66,6 @@ class pushbullet extends eqLogic {
 				curl_setopt($curl, CURLOPT_USERPWD, $this->getConfiguration('token') . ':');
 				curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 			}
-			log::add('pushbullet', 'debug', 'A');
 			if ($_data) {
 				switch ($_dataType) {
 					case 'json':
@@ -841,7 +839,7 @@ class pushbulletCmd extends cmd {
 				}
 				*/
 				// Case 1 : file from CAMERA plugin
-				if ($_options['files'] && is_array($_options['files']) && is_file($_options['files'][0])) {
+				if (array_key_exists('files', $_options) && is_array($_options['files']) && is_file($_options['files'][0])) {
 					log::add('pushbullet', 'debug', 'file detected');
 					$file = $_options['files'][0];
 
