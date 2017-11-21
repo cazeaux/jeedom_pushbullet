@@ -1,0 +1,193 @@
+==== Envoi de notification vers un device
+===== Principe
+
+Il est possible d'envoyer une notification depuis Jeedom
+
+* à un device particulier d'un équipement
+* à tous les devices d'un équipement
+
+===== Notification manuelle
+
+Une notification peut être envoyée manuellement via le dashboard Jeedom, en utilisant les wdiget correspondant aux device. Il suffit de remplir le titre et le contenu du message
+
+image::../images/pushbullet_dash.png[]
+
+===== Usage dans un scénario
+
+Il est possible d'envoyer une notification dans le déroulement d'un scénario. Pour cela, il suffit d'invoquer l'action correspondant au device vers lequel la notification doit être envoyée.
+
+image::../images/pushbullet_scenario.png[]
+
+===== Envoie d'une image
+
+Il est possible d'envoyer une image depuis Jeedom vers Pushbullet. Pour cela, il suffit de mettre l'URL de l'image dans le champs "titre" de la notification. Si l'URL pointe vers une image, le plugin le reconnaitra automatiquement et traitera la notification comme un envoi d'image. Sinon, la notification sera traitée comme une notification classique.
+
+image::../images/pushbullet_dash_url.png[]
+
+===== Intégration dans d'autres plugins
+
+====== Plugin Camera
+
+Le plugin Camera permet de définir un équipement qui sert à recevoir les captures d'image de la caméra. A cet endroit, il est possible de définir un équipement Pushbullet. Ainsi, les captures seront envoyés à cet équipement pushbullet.
+
+image::../images/pushbullet_camera.png[]
+
+Utilisations possibles:
+
+* créer un scénario qui appelle la commande "envoyer une capture" de l'objet caméra
+* créer une interaction associée à la commande "envoyer une capture" de l'objet caméra, ce qui permet de demander une capture en envoyant depuis Pushbullet une notification à Jeedom
+
+
+==== Envoi de notification vers Jeedom
+===== Principe
+
+Il est possible d'envoyer un push vers Jeedom depuis l'application Pushbullet. L'application Pushbullet peut être celle sur Android, iPhone, ou plus simplement via http://www.pushbullet.com
+
+Les notifications reçues par Jeedom sont traitées quasi instantanément. Dans le cas (très rare) où plusieurs nouvelles notifications seraient envoyées simultanément, elles seront toutes prises en compte dans leur ordre d'arrivée.
+
+[IMPORTANT]
+Toutes les notifications déclencheront une interaction (si les interactions sont activées sur l'équipement en question)
+
+[IMPORTANT]
+En cas de notifications multiples, seule la dernière notification déclenchera un scénario (si l'équipement est défini comme déclencheur d'un scénario). C'est une limitation actuelle de Jeedom, qui pourra être levée plus tard.
+
+===== Notification simple
+
+Une notification simple consiste à envoyer un push vers Jeedom qui sera immédiatement traitée. Ce traitement consiste à mettre à jour le device Jeedom avec comme nouvelle valeur ce qui aura été mis dans le message de la notification.
+
+Une telle notification s'envoie depuis Pushbullet avec :
+
+* `Message` : le contenu du message qui sera utilisé pour mettre à jour le device Jeedom
+
+image::../images/pushbullet_push_basique2_new.png[]
+
+Cette notification peut alors être utilisée de manière classique dans Jeedom (comme tout équipement de type "info"):
+
+* Pour déclencher une scénario
+* Pour faire un test dans un scénario
+* Etc.
+
+_Exemple_:
+
+image::../images/pushbullet_push_basique1.png[]
+
+===== Notification programmée
+
+Le principe d'une notification programmée est le même qu'une notification simple. La différence, c'est qu'il est possible de définir l'heure à laquelle le device Jeedom sera mis à jour. Ainsi, si par exemple le device Jeedom était associé comme déclencheur du scénario, il devient possible de déclencher le scénario à l'horaire souhaité.
+
+====== Format de message (ancienne version, toujours supportée)
+
+L'envoi d'une notification programmée s'effectue de la même manière qu'une notification simple, mais le contenu du message sera constitué de 2 lignes:
+
+* La première ligne contient l'heure de programmation, au format ci-dessous
+
+    P <heure>
+
+Où `<heure>` correspond à l'horaire souhaitée
+
+La syntaxe de `<heure>` suit celle définie ici : http://php.net/manual/fr/datetime.formats.php. Les formats absolus et relatifs sont supportés
+
+* Les lignes suivantes contiennent les messages envoyés à jeedom
+
+
+_Exemples_
+
+    P 18:30 -> programmera un évènement pour 18h30 le même jour
+
+    P 25-12-2014 20:00 -> programmera un évènement le jour de Noël à 20:00
+
+    P 72 hours -> programmera un évènement qui se déclenchera dans 72 heures
+
+image::../images/pushbullet_push_basique3_new.png[]
+
+====== Format de message (nouvelle version, depuis v2.50)
+
+L'envoi d'une notification programmée s'effectue de la même manière qu'une notification simple, mais le contenu du message sera formatté sur une seule ligne avec '/' comme séparateur et comme premier caractère:
+
+* La première partie contient l'heure de programmation, au format ci-dessous
+
+    <heure>
+
+Où `<heure>` correspond à l'horaire souhaitée
+
+La syntaxe de `<heure>` suit celle définie ici : http://php.net/manual/fr/datetime.formats.php. Les formats absolus et relatifs sont supportés
+
+* Les parties suivantes contiennentt les message envoyés à jeedom
+
+
+_Exemples_
+
+    /18:30/message 1/message 2 -> programmera un évènement pour 18h30 le même jour
+
+    /25-12-2014 20:00/message 1/message 2 -> programmera un évènement le jour de Noël à 20:00
+
+    /72 hours/message 1/message 2 -> programmera un évènement qui se déclenchera dans 72 heures
+
+
+
+===== Remarques
+
+Une notification programmée ne se déclenche qu'une seule fois, et uniquement à l'horaire programmé.
+
+Il est possible de programmer plusieurs évènements (à des horaires différents ou pas).
+
+
+==== Utilisation avec des interactions
+
+===== Principe
+
+Lorsque l'option **Activer les interactions sur cet équipement* est activée, tout push envoyé vers Jeedom (sous forme de notification basique ou programmée) sera alors injecté (immédiatement si notification basique, ou à l'horaire prévue si notification programmée) dans le moteur d'interactions de Jeedom.
+
+Le fait d'injecter le push dans le moteur d'interaction vient en complément du principe de base du push. Autrement dit en plus du déclenchement de l'interaction, le device Jeedom sera quand même mis à jour, et s'il y a lieu déclenchera les scénarios où ce device a été défini comme déclencheur.
+
+===== Le message est injecté dans le moteur d'interactions
+
+Dans le moteur d'interaction, seul le message de la notification est injecté. Le titre n'est pas utilisé.
+
+===== Réponse de l'interaction
+
+Si l'interaction donne lieu à une réponse, celle-ci peut être transmise via une notification vers un des devices Pushbullet. Les devices vers lesquels sont transmises les réponses doivent être sélectionnés dans la page de configuration de l'équipement Pushbullet (voir Pushbullet : Installation et configuration initiale).
+
+Une réponse issue d'une interaction déclenchée par réception d'un push sur un équipement Pushbullet donné ne peut être transmise que vers un device de ce même équipement.
+
+
+==== Développeurs
+
+===== Envoi d'une notifiation classique vers Pushbullet
+
+Pour envoyer une notification avec un texte classique en invoquant une commande Pushbullet, il suffit de passer en paramètre le chemin du fichier, comme décrit dans l'exemple de code ci-dessous.
+
+	$_options['title'] = 'my title';
+	$_options['message'] = 'my message';
+	$cmd = /* objet commande Pushbullet */;
+	$cmd->execCmd($_options);
+
+Au moins un des deux paramètres 'title' ou 'message' doit être non vide. Il est recommandé de privilégier l'usage de 'message'.
+
+===== Envoi d'un fichier local vers Pushbullet
+
+Pour envoyer un fichier (qui se trouve localement sur le serveur de Jeedom) en invoquant une commande Pushbullet, il suffit de passer en paramètre le chemin du fichier, comme décrit dans l'exemple de code ci-dessous.
+
+	$filename = '/tmp/myfile.txt';
+	$_options['files'] = array($filename);
+	$cmd = /* objet commande Pushbullet */;
+	$cmd->execCmd($_options);
+
+
+===== Envoi d'une URL vers Pushbullet
+Pour envoyer une URL pointant sur une image (pas d'autres format supportés) en invoquant une commande Pushbullet, il suffit de passer en paramètre l'URL, comme décrit dans l'exemple de code ci-dessous.
+
+	$url = 'https://goo.gl/pBexp5';
+	$_options['title'] = $url;
+	$cmd = /* objet commande Pushbullet */;
+	$cmd->execCmd($_options);
+
+Si l'URL ne pointe pas vers une image, la notification sera traitée comme une notification classique.
+
+===== Ordre de priorité
+
+Les 3 types de notifications (classique, fichier, URL) sont exclusifs. L'ordre de priorité suivant s'applique:
+
+* fichier
+* URL
+* classique
