@@ -1,0 +1,11 @@
+==== Générale
+
+Plugin permettant de faire interagir le service Pushbullet avec Jeedom.
+Les principales fonctionnalités sont :
+
+* envoi de notifications depuis jeedom vers un device pushbullet
+* envoi de commandes depuis pushbullet vers jeedom, avec support des interactions jeedom
+
+==== Pré-requis
+
+L'utilisation de ce plugin requiert de créer un compte (gratuit) sur http://www.pushbullet.com

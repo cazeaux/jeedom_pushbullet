@@ -1,0 +1,88 @@
+==== Introduction et création d'un compte chez Pushbullet
+
+Le plugin pushbullet permet d'interagir avec le service http://www.pushbullet.com. Avant toute chose, il faut donc commencer par créer un compte gratuitement chez Pushbullet. Dans le plugin pushbullet, un compte pushbullet sera représenté par un équipement. Donc en cas de possession de plusieurs comptes Pushbullet, il sera possible de les associer à autant d'équipements. Il est aussi possible de créer plusieurs équipements sur le même compte Pushbullet, ça ne pose aucun problème.
+
+[TIP]
+Dans la suite des explications, nous ferons comme s'il n'y avait qu'un seul compte (donc un seul équipement). Tout ce qui est indiqué pourra être appliqué à chacun des équipements.
+
+Une application Pushbullet est disponible sur Android et iPhone. Lors de l'installation de l'application, le smartphone sur lequel a été installée l'application apparaîtra dans la liste des devices (sur le compte qui aura été utilisé). Le smartphone devient ainsi capable de recevoir des notification push.
+
+==== Vocabulaire
+
+[cols="2"]
+|===
+|Device
+|désigne un "device" créer dans le service Pushbullet, vers lequel il est possible d'envoyer une notification
+
+|Device de push
+|device Pushbullet correspondant à Jeedom. Ce device est géré automatiquement par Jeedom, et se nomme "Jeedom_xx" où xx est un nombre (ex: Jeedom_49)
+
+|Push vers Jeedom
+|consiste à envoyer une notification vers le device de push
+
+|Token
+|une clé associée au compte Pushbullet, qu'il faut récupérer sur le service Pushbullet
+|===
+
+==== Obtenir le token Pushbullet
+
+. Se connecter sur http://www.pushbullet.com
+. Cliquer sur l'icône de compte en haut à droite et cliquer sur "Account Settings"
+. Plugin pushbullet token.png
+. Générer un token si nécessaire
+
+==== Installation du plugin
+
+L'installation du plugin passe par le market, comme tous les plugins. Après installation, aucune configuration n'est nécessaire au niveau du plugin, tout se passe dans les équipements.
+
+== Création d'un équipement
+
+Aller dans la page du plugin, dans *Plugins > Communication > Pushbullet*
+
+A l'ajout, un nom est demandé : mettre le nom souhaité. Après validation, la page des paramètres apparaît :
+
+_Paramètres équipement Pushbullet_
+[cols="2"]
+|===
+|Token pushbullet
+|La valeur du token récupéré depuis Pushbullet (dans Account settings)
+
+|Activer l'envoi de commandes vers jeedom via cet équipement
+|Cocher cette option pour activer la possibilité d'envoyer des push vers Jeedom via cet équipement. A l'activation, un device Jeedom apparaitra dans le compte Pushbullet.
+
+|Activer les interactions sur cet équipement
+|Cocher cette option pour activer le lien avec les interactions Jeedom. Les interactions sont utilisées uniquement pour les push vers Jeedom (il faut donc que l'option précédente soit activée)
+
+|Ne pas inclure la commande reçue dans les réponses envoyées après exécution d'une interaction
+|Ce paramètre s'applique aux réponses émises vers les devices Jeedom sélectionnés (voir plus bas), après traitement d'une interaction et ce après réception par Jeedom d'un push. Par défaut, la réponse envoyée informe de la commande initiale (celle initialement reçue sur le push, et qui a servi à déclencher l'interaction). Par exemple: "commande initiale : quelle est la température du salon?". Cocher cette option permet de retirer cette information de la réponse.
+
+|Ecouter les push entrant sur jeedom "envoyés à tous" (en plus de ceux explicitement envoyés à Jeedom)
+|Désactivé par défaut. Certaines applications comme IFTTT ne permettent pas d'envoyer une notification à un device en particulier, mais seulement à tous. Lorsqu'activé, ce paramètre permet de prendre en compte ces notifications (en plus de celles envoyées à Jeedom explicitement). Toutefois, les notifications envoyées de Jeedom de cet équipement vers cet équipement seront ignorées (pour éviter les boucles).
+
+|Timestamp
+|Une information technique qui indique l'heure du dernier push analaysé
+
+|Dernière valeur de push
+|Indique la dernière valeur reçue sur le device Jeedom (via un push vers Jeedom)
+|===
+
+Après enregistrement, la liste des device apparaîtra.
+
+==== Paramètres d'un device
+
+[cols="2"]
+|===
+|Type
+|Un device normal est de type "action". Le device Jeedom est de type "info"
+
+|Nom du device
+|Le nom du device tel qu'il apparaît dans Pushbullet.
+
+|Activer les interactions sur cet équipement
+|Cocher cette option pour activer le lien avec les interactions Jeedom. Les interactions sont utilisées uniquement pour les push vers Jeedom (il faut donc que l'option précédente soit activée)
+
+|Ce device recevra les réponses d'interaction
+|Lorsqu'un push vers Jeedom déclenche une interaction et que celle-ci génère une réponse, elle sera envoyé aux devices où cette option a été activée.
+|===
+
+
