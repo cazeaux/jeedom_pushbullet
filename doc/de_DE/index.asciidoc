@@ -3,11 +3,11 @@
 === Description
 include::description.asciidoc[]
 
-=== Configuration
+=== Konfiguration
 include::configuration.asciidoc[]
 
 === FAQ
 include::faq.asciidoc[]
 
-== Installation et configuration initiale
+== Installation und Konfiguration
 include::installation.asciidoc[]
