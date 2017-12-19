@@ -6,7 +6,7 @@ Il est possible d'envoyer une notification depuis Jeedom
 * à un device particulier d'un équipement
 * à tous les devices d'un équipement
 
-===== Notification manuelle
+===== Manuelle Benachrichtigungen
 
 Une notification peut être envoyée manuellement via le dashboard Jeedom, en utilisant les wdiget correspondant aux device. Il suffit de remplir le titre et le contenu du message
 
