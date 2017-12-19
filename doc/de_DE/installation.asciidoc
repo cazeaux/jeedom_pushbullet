@@ -7,7 +7,7 @@ Dans la suite des explications, nous ferons comme s'il n'y avait qu'un seul comp
 
 Une application Pushbullet est disponible sur Android et iPhone. Lors de l'installation de l'application, le smartphone sur lequel a été installée l'application apparaîtra dans la liste des devices (sur le compte qui aura été utilisé). Le smartphone devient ainsi capable de recevoir des notification push.
 
-==== Vocabulaire
+==== Wortschatz
 
 [cols="2"]
 |===
