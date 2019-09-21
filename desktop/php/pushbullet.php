@@ -2,177 +2,187 @@
 if (!isConnect('admin')) {
     throw new Exception('{{401 - Accès non autorisé}}');
 }
-sendVarToJS('eqType', 'pushbullet');
-$eqLogics = eqLogic::byType('pushbullet')
+
+
+/************* CONSTRUCTION SELECTEURS PAYS et STATIONS ****************/
+$path_to_icao_db=substr(dirname(__FILE__),0,strpos (dirname(__FILE__),'/plugins/pushbullet')).'/plugins/pushbullet/core/ressources/';
+
+$plugin = plugin::byId('pushbullet');
+sendVarToJS('eqType', $plugin->getId());
+$eqLogics = eqLogic::byType($plugin->getId());
 ?>
 
 <div class="row row-overflow">
-    <div class="col-lg-2 col-md-3 col-sm-4">
-        <div class="bs-sidebar">
-            <ul id="ul_eqLogic" class="nav nav-list bs-sidenav">
-                <a class="btn btn-default eqLogicAction" style="width : 100%;margin-top : 5px;margin-bottom: 5px;" data-action="add"><i class="fa fa-plus-circle"></i> {{Ajouter un équipement}}</a>
-                <li class="filter" style="margin-bottom: 5px;"><input class="filter form-control input-sm" placeholder="{{Rechercher}}" style="width: 100%"/></li>
-                <?php
-                foreach ($eqLogics as $eqLogic) {
-                    echo '<li class="cursor li_eqLogic" data-eqLogic_id="' . $eqLogic->getId() . '"><a>' . $eqLogic->getHumanName(true) . '</a></li>';
-                }
-                ?>
-            </ul>
-        </div>
-    </div>
-
-    <div class="col-lg-10 col-md-9 col-sm-8 eqLogicThumbnailDisplay" style="border-left: solid 1px #EEE; padding-left: 25px;">
-        <legend>{{Mes équipements Pushbullet}}</legend>
+	<div class="col-xs-12 eqLogicThumbnailDisplay">
+		<legend><i class="icon loisir-two28"></i> {{Gestion}}</legend>
 		<div class="eqLogicThumbnailContainer">
-			<div class="cursor eqLogicAction" data-action="add" style="background-color : #ffffff; height : 200px;margin-bottom : 10px;padding : 5px;border-radius: 2px;width : 160px;margin-left : 10px;" >
-				<center>
-					<i class="fa fa-plus-circle" style="font-size : 7em;color:#94ca02;"></i>
-				</center>
-				<span style="font-size : 1.1em;position:relative; top : 23px;word-break: break-all;white-space: pre-wrap;word-wrap: break-word;color:#94ca02"><center>Ajouter</center></span>
+			<div class="cursor eqLogicAction logoPrimary" data-action="add" >
+				<i class="fas fa-plus-circle"></i>
+				<br/>
+				<span>{{Ajouter}}</span>
 			</div>
-        <?php
-		foreach ($eqLogics as $eqLogic) {
-			echo '<div class="eqLogicDisplayCard cursor" data-eqLogic_id="' . $eqLogic->getId() . '" style="background-color : #ffffff; height : 200px;margin-bottom : 10px;padding : 5px;border-radius: 2px;width : 160px;margin-left : 10px;" >';
-			echo "<center>";
-			echo '<img src="plugins/pushbullet/doc/images/pushbullet_icon.png" height="105"  />';
-			echo "</center>";
-			echo '<span style="font-size : 1.1em;position:relative; top : 15px;word-break: break-all;white-space: pre-wrap;word-wrap: break-word;"><center>' . $eqLogic->getHumanName(true, true) . '</center></span>';
-			echo '</div>';
-		}
-        ?>
 		</div>
-
+		<legend><i class="fas fa-phone"></i> {{Mes Pushbullet}}</legend>
+		<input class="form-control" placeholder="{{Rechercher}}" id="in_searchEqlogic" />
+		<div class="eqLogicThumbnailContainer">
+			<?php
+			foreach ($eqLogics as $eqLogic) {
+				$opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
+				echo '<div class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '" >';
+				echo '<img src="' . $plugin->getPathImgIcon() . '" />';
+				echo '<br>';
+				echo '<span class="name">' . $eqLogic->getHumanName(true, true) . '</span>';
+				echo '</div>';
+			}
+			?>
+		</div>
 	</div>
-
-    <div class="col-lg-10 eqLogic" style="border-left: solid 1px #EEE; padding-left: 25px;display: none;">
-        <form class="form-horizontal">
-            <fieldset>
-				<legend>
-					<i class="fa fa-arrow-circle-left eqLogicAction cursor" data-action="returnToThumbnailDisplay"></i> {{Général}}
-					<i class='fa fa-cogs eqLogicAction pull-right cursor expertModeVisible' data-action='configure'></i>
-					<a class="btn btn-xs btn-default pull-right eqLogicAction" data-action="copy"><i class="fa fa-files-o"></i> {{Dupliquer}}</a>
-				</legend>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">{{Nom de l'équipement PushBullet}}</label>
-                    <div class="col-sm-3">
-                        <input type="text" class="eqLogicAttr form-control" data-l1key="id" style="display : none;" />
-                        <input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom de l'équipement PushBullet}}"/>
-                    </div>
+    <div class="col-xs-12 eqLogic" style="display: none;">
+		<div class="input-group pull-right" style="display:inline-flex">
+			<span class="input-group-btn">
+				<a class="btn btn-default btn-sm eqLogicAction" data-action="configure"><i class="fas fa-cogs"></i> {{Configuration avancée}}</a><a class="btn btn-default btn-sm eqLogicAction" data-action="copy"><i class="fas fa-copy"></i> {{Dupliquer}}</a><a class="btn btn-sm btn-success eqLogicAction" data-action="save"><i class="fas fa-check-circle"></i> {{Sauvegarder}}</a><a class="btn btn-danger btn-sm eqLogicAction roundedRight" data-action="remove"><i class="fas fa-minus-circle"></i> {{Supprimer}}</a>
+			</span>
+		</div>   
+		<ul class="nav nav-tabs" role="tablist">
+			<li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" data-action="returnToThumbnailDisplay"><i class="fas fa-arrow-circle-left"></i></a></li>
+			<li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Equipement}}</a></li>
+            <li role="presentation"><a href="#eqparatab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-wrench"></i> {{Paramètres}}</a></li>
+			<li role="presentation"><a href="#commandtab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-list-alt"></i> {{Commandes}}</a></li>
+		</ul>
+        <div class="tab-content" style="height:calc(100% - 50px);overflow:auto;overflow-x: hidden;">
+            <div role="tabpanel" class="tab-pane active" id="eqlogictab">
+                <br/>
+                <form class="form-horizontal">
+                    <fieldset>
+						<div class="form-group">
+							<label class="col-sm-2 control-label">{{Nom de l'équipement virtuel}}</label>
+							<div class="col-sm-3">
+								<input type="text" class="eqLogicAttr form-control" data-l1key="id" style="display : none;" />
+								<input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom de l'équipement virtuel}}"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-2 control-label" >{{Objet parent}}</label>
+							<div class="col-sm-3">
+								<select class="form-control eqLogicAttr" data-l1key="object_id">
+									<option value="">{{Aucun}}</option>
+									<?php
+									foreach (jeeObject::all() as $object) {
+										echo '<option value="' . $object->getId() . '">' . $object->getName() . '</option>';
+									}
+									?>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-2 control-label">{{Catégorie}}</label>
+							<div class="col-sm-8">
+								<?php
+								foreach (jeedom::getConfiguration('eqLogic:category') as $key => $value) {
+									echo '<label class="checkbox-inline">';
+									echo '<input type="checkbox" class="eqLogicAttr" data-l1key="category" data-l2key="' . $key . '" />' . $value['name'];
+									echo '</label>';
+								}
+								?>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-2 control-label"></label>
+							<div class="col-sm-9">
+								<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-l1key="isEnable" checked/>{{Activer}}</label>
+								<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-l1key="isVisible" checked/>{{Visible}}</label>
+							</div>
+                        </div>
+					</fieldset>
+				</form>
+			</div>
+            <div role="tabpanel" class="tab-pane" id="eqparatab">
+                <br/>
+                <form class="form-horizontal">
+                    <fieldset>
+                        <legend><i class="fas fa-wrench"></i>  {{Paramètres}}</legend>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">{{Token Pushbullet}}</label>
+                            <div class="col-md-3">
+                                <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="token" placeholder="token"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">{{Nom du device Jeedom dans Pushbullet}}</label>
+                            <div class="col-md-3">
+                                <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="jeedomDeviceName" placeholder="jeedom device name"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+							<label class="col-sm-3 control-label">{{Activer l'envoi de commandes vers jeedom via cet équipement}}</label>
+							<div class="col-sm-8">
+								<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="isPushEnabled" checked/>{{Activer}}
+							</div>
+						</div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">{{Envoyer la réponses des interactions au device qui a émis la commande (si Activer, ce paramètre se substitue au choix fait au niveau de chaque device)}}</label>
+                            <div class="col-sm-8">
+                                <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="sendBackReponseToSource" checked/>{{Activer}}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">{{Activer les interactions sur cet équipement}}</label>
+                            <div class="col-sm-8">
+                                <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="isInteractionEnabled" checked/>{{Activer}}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">{{Inclure la commande reçue dans les réponses envoyées après exécution d'une interaction}}</label>
+                            <div class="col-sm-8">
+                                <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="dismissInitialCommandeInReply"/>{{Activer}}
+                            </div>
+                        </div>                        
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">{{Ecouter les push entrant sur jeedom "envoyés à tous" (en plus de ceux explicitement envoyés à Jeedom)}}</label>
+                            <div class="col-sm-8">
+                                <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="listenAllPushes" />{{Activer}}
+                            </div>
+                        </div>                        
+                        <br />
+                        <br />
+                        <legend><i class="fas fa-terminal"></i>  {{Dernière commande reçue}}</legend>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">{{Timestamp}}</label>
+                            <div class="col-md-3">
+                                <span class="eqLogicAttr" data-l1key="configuration" data-l2key="timestamp" readonly="true" placeholder="timestamp du dernier push reçu"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">{{Dernière valeur push}}</label>
+                            <div class="col-md-3">
+                                <span class="eqLogicAttr" data-l1key="configuration" data-l2key="lastvalue" readonly="true" placeholder="valeur du dernier push reçu"/>
+                            </div>
+                        </div> 
+					</fieldset>
+				</form>
+			</div>
+			<div role="tabpanel" class="tab-pane" id="commandtab">
+				<br/>
+                <div class="alert alert-info">
+                    {{Pour un parfaite intégration de PushBullet et Jeedom, dans votre scenario PushBullet il faut mettre dans titre "$title$" et dans message "$message$".}}
                 </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" >{{Objet parent}}</label>
-                    <div class="col-sm-3">
-                        <select class="eqLogicAttr form-control" data-l1key="object_id">
-                            <option value="">{{Aucun}}</option>
-                            <?php
-                            foreach (object::all() as $object) {
-                                echo '<option value="' . $object->getId() . '">' . $object->getName() . '</option>';
-                            }
-                            ?>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-					<label class="col-sm-3 control-label"></label>
-					<div class="col-sm-9">
-						<label class="checkbox-inline">
-			                <input type="checkbox" class="eqLogicAttr" data-l1key="isEnable" checked/>{{Activer}}
-						</label>
-						<label class="checkbox-inline">
-			                <input type="checkbox" class="eqLogicAttr" data-l1key="isVisible" checked/>{{Visible}}
-						</label>
-					</div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">{{Token Pushbullet}}</label>
-                    <div class="col-md-3">
-                        <input type="text" class="eqLogicAttr configuration form-control" data-l1key="configuration" data-l2key="token" placeholder="token"/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">{{Nom du device Jeedom dans Pushbullet}}</label>
-                    <div class="col-md-3">
-                        <input type="text" class="eqLogicAttr configuration form-control" data-l1key="configuration" data-l2key="jeedomDeviceName" placeholder="jeedom device name"/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">{{Activer l'envoi de commandes vers jeedom via cet équipement}}</label>
-                    <div class="col-sm-9">
-						<label class="checkbox-inline">
-							<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="isPushEnabled" checked/>{{Activer}}
-						</label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">{{Envoyer la réponses des interactions au device qui a émis la commande (si Activer, ce paramètre se substitue au choix fait au niveau de chaque device)}}</label>
-                    <div class="col-sm-9">
-						<label class="checkbox-inline">
-							<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="sendBackReponseToSource" checked/>{{Activer}}
-						</label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">{{Activer les interactions sur cet équipement}}</label>
-                    <div class="col-sm-9">
-						<label class="checkbox-inline">
-							<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="isInteractionEnabled" checked/>{{Activer}}
-						</label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">{{Inclure la commande reçue dans les réponses envoyées après exécution d'une interaction}}</label>
-                    <div class="col-sm-9">
-						<label class="checkbox-inline">
-							<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="dismissInitialCommandeInReply"/>{{Activer}}
-						</label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">{{Ecouter les push entrant sur jeedom "envoyés à tous" (en plus de ceux explicitement envoyés à Jeedom)}}</label>
-                    <div class="col-sm-9">
-						<label class="checkbox-inline">
-							<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="listenAllPushes" />{{Activer}}
-						</label>
-                    </div>
-                </div>
-            </fieldset> 
-        </form>
-        <legend>{{Dernière commande reçue}}</legend>
-		<p>
-			<label class="col-sm-3 control-label">{{Timestamp}}</label>
-			<span class="eqLogicAttr" data-l1key="configuration" data-l2key="timestamp" readonly="true" placeholder="timestamp du dernier push reçu"/>
-		</p>
-		<p>
-			<label class="col-sm-3 control-label">{{Dernière valeur push}}</label>
-			<span class="eqLogicAttr" data-l1key="configuration" data-l2key="lastvalue" readonly="true" placeholder="valeur du dernier push reçu"/>
-		</p>
-
-        <legend>{{PushBullet}}</legend>
-        <div class="alert alert-info">
-            {{Pour un parfaite intégration de PushBullet et Jeedom, dans votre scenario PushBullet il faut mettre dans titre "$title$" et dans message "$message$".}}
-        </div>
-
-
-        <table id="table_cmd" class="table table-bordered table-condensed">
-            <thead>
-                <tr>
-                    <th>{{Id}}</th><th>{{Type}}</th><th>{{Nom du device}}</th><th>{{Paramètres}}</th><th>{{Actions}}</th>
-                </tr>
-            </thead>
-            <tbody>
-
-            </tbody>
-        </table>
-
-        <form class="form-horizontal">
-            <fieldset>
-                <div class="form-actions">
-                    <a class="btn btn-danger eqLogicAction" data-action="remove"><i class="fa fa-minus-circle"></i> {{Supprimer}}</a>
-                    <a class="btn btn-success eqLogicAction" data-action="save"><i class="fa fa-check-circle"></i> {{Sauvegarder}}</a>
-                </div>
-            </fieldset>
-        </form>
-
+				<table id="table_cmd" class="table table-bordered table-condensed">
+					<thead>
+                        <tr>
+                            <th style="width: 20px;">{{ID}}</th>
+                            <th style="width: 50px;">{{Type}}</th>
+                            <th style="width: 350px;">{{Nom du service}}</th>
+                            <th style="width: 150px;">{{Options}}</th>
+                            <th style="width: 20px;">{{Actions}}</th>
+                        </tr>
+					</thead>
+					<tbody>
+						
+					</tbody>
+				</table>
+				
+			</div>
+		</div>
     </div>
 </div>
 
