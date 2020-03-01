@@ -1,12 +1,16 @@
 {
-	"id" : "pushbullet",
-	"name" : "PushBullet",
-	"description" : "Plugin pour utiliser PushBullet",
-	"licence" : "AGPL",
-	"author" : "Stéphane Cazeaux",
-	"require" : "3.0",
-	"category" : "communication",
-	"hasDependency" : false,
-	"hasOwnDeamon" : true,
-	"maxDependancyInstallTime" : 0
+    "id" : "pushbullet",
+    "name" : "PushBulle",
+    "description" : "Plugin pour obtenir le point de rosée, le point de givrage et l'humidité absolue.",
+    "usage" : "Ce plugin permet d'envoyer des notifictions à son mobile (Android/IOS) via le service (gratuit) PushBullet. Il permet également de recevoir sur jeedom des push envoyés depuis une application Pushbullet (ce qui offre un moyen par exemple de déclencher des scripts).",
+    "licence" : "AGPL",
+    "author" : "Stéphane Cazeaux",
+    "require" : "3.3.24",
+    "category" : "weather",
+    "hasDependency" : false,
+    "hasOwnDeamon" : false,
+    "language" : ["de_DE","en_US","es_ES","fr_FR","id_ID","it_IT","ru_RU","sp_SP"],
+    "changelog" : "https://jealg.github.io/Plugin-rosee/#language#/changelog",
+    "documentation" : "https://jealg.github.io/Plugin-rosee/#language#/",
+    "compatibility" : ["miniplus","smart","rpi","docker","diy","v4"]
 }
