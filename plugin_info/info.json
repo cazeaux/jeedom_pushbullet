@@ -8,9 +8,9 @@
     "require" : "3.3.24",
     "category" : "weather",
     "hasDependency" : false,
-    "hasOwnDeamon" : false,
+    "hasOwnDeamon" : true,
     "language" : ["de_DE","en_US","es_ES","fr_FR","id_ID","it_IT","ru_RU","sp_SP"],
-    "changelog" : "https://jealg.github.io/Plugin-rosee/#language#/changelog",
-    "documentation" : "https://jealg.github.io/Plugin-rosee/#language#/",
+    "changelog" : "https://jeedom.github.io/documentation/third_plugin/pushbullet/#language#/index.html#_changelog",
+    "documentation" : "https://jeedom.github.io/documentation/third_plugin/pushbullet/#language#/index.html",
     "compatibility" : ["miniplus","smart","rpi","docker","diy","v4"]
 }
