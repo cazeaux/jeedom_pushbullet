@@ -6,10 +6,11 @@
     "licence" : "AGPL",
     "author" : "Stéphane Cazeaux",
     "require" : "3.3.24",
-    "category" : "weather",
+    "category" : "communication",
     "hasDependency" : false,
     "hasOwnDeamon" : true,
-    "language" : ["de_DE","en_US","es_ES","fr_FR","id_ID","it_IT","ru_RU","sp_SP"],
+    "maxDependancyInstallTime" : 0,
+    "language" : ["en_US","fr_FR"],
     "changelog" : "https://jeedom.github.io/documentation/third_plugin/pushbullet/#language#/index.html#_changelog",
     "documentation" : "https://jeedom.github.io/documentation/third_plugin/pushbullet/#language#/index.html",
     "compatibility" : ["miniplus","smart","rpi","docker","diy","v4"]
