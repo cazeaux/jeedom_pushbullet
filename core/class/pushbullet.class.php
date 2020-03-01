@@ -35,20 +35,16 @@ if (!function_exists('curl_file_create')) {
 }
 
 class pushbullet extends eqLogic {
-
-
-		public function doCurlRequest ($_url, $_method, $_data=null, $_dataType = 'json', $_useAuth=true) {
-
-			log::add('pushbullet', 'debug', '('.$this->getId().') curl request '.$_method.' '.$_url.' ('.serialize($_data).')');
-			$curl = curl_init();
-		
-			// Servira a setter le dernier timestamp sur le dernier push de la liste
-			curl_setopt($curl, CURLOPT_URL, $_url);
-			switch ($_method) {
-				case 'GET':
-					curl_setopt($curl, CURLOPT_HTTPGET, true);
-					break;
-
+    public function doCurlRequest ($_url, $_method, $_data=null, $_dataType = 'json', $_useAuth=true) {
+        log::add('pushbullet', 'debug', '('.$this->getId().') curl request '.$_method.' '.$_url.' ('.serialize($_data).')');
+        $curl = curl_init();
+        
+        // Servira a setter le dernier timestamp sur le dernier push de la liste
+            curl_setopt($curl, CURLOPT_URL, $_url);
+            switch ($_method) {
+                case 'GET':
+                    curl_setopt($curl, CURLOPT_HTTPGET, true);
+                    break;
 				case 'POST':
 					curl_setopt($curl, CURLOPT_POST, true);
 					break;
