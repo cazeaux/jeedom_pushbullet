@@ -10,7 +10,7 @@
     "hasDependency" : false,
     "hasOwnDeamon" : true,
     "maxDependancyInstallTime" : 0,
-    "language" : ["de_DE","en_US","es_ES","fr_FR","id_ID","it_IT","ru_RU","sp_SP"],
+    "language" : ["fr_FR"],
     "changelog" : "https://jeedom.github.io/documentation/third_plugin/pushbullet/#language#/index.html#_changelog",
     "documentation" : "https://jeedom.github.io/documentation/third_plugin/pushbullet/#language#/index.html",
     "compatibility" : ["miniplus","smart","rpi","docker","diy","v4"]
