@@ -2,7 +2,7 @@
     "id" : "pushbullet",
     "name" : "PushBullet",
     "description" : "Plugin pour obtenir le point de rosée, le point de givrage et l'humidité absolue.",
-    "usage" : "Ce plugin permet d'envoyer des notifictions à son mobile (Android/IOS) via le service (gratuit) PushBullet. Il permet également de recevoir sur jeedom des push envoyés depuis une application Pushbullet (ce qui offre un moyen par exemple de déclencher des scripts).",
+    "usage" : "Plugin pour utiliser PushBullet",
     "licence" : "AGPL",
     "author" : "Stéphane Cazeaux",
     "require" : "3.3.24",
