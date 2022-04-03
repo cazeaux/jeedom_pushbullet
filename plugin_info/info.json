@@ -8,5 +8,11 @@
 	"category" : "communication",
 	"hasDependency" : false,
 	"hasOwnDeamon" : true,
-	"maxDependancyInstallTime" : 0
+	"maxDependancyInstallTime" : 0,
+	"compatibility": [
+		"miniplus",
+		"rpi",
+		"diy",
+		"v4"
+	]
 }

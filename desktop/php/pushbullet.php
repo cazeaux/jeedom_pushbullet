@@ -2,8 +2,9 @@
 if (!isConnect('admin')) {
     throw new Exception('{{401 - Accès non autorisé}}');
 }
-sendVarToJS('eqType', 'pushbullet');
-$eqLogics = eqLogic::byType('pushbullet')
+$plugin = plugin::byId('pushbullet');
+sendVarToJS('eqType', $plugin->getId());
+$eqLogics = eqLogic::byType($plugin->getId())
 ?>
 
 <div class="row row-overflow">
@@ -138,6 +139,10 @@ $eqLogics = eqLogic::byType('pushbullet')
             </fieldset> 
         </form>
         <legend>{{Dernière commande reçue}}</legend>
+		<p>
+			<label class="col-sm-3 control-label">{{Timestamp}}</label>
+			<span class="eqLogicAttr" data-l1key="configuration" data-l2key="timestamp" readonly="true" placeholder="timestamp du dernier push reçu"/>
+		</p>
 		<p>
 			<label class="col-sm-3 control-label">{{Timestamp}}</label>
 			<span class="eqLogicAttr" data-l1key="configuration" data-l2key="timestamp" readonly="true" placeholder="timestamp du dernier push reçu"/>
