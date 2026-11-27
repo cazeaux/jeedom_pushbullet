@@ -7,9 +7,7 @@ from typing import Callable, Optional, Union
 
 from ._exceptions import WebSocketPayloadException, WebSocketProtocolException
 from ._utils import validate_utf8
-
 """
-_abnf.py
 websocket - WebSocket client library for Python
 
 Copyright 2024 engn33r
@@ -100,23 +98,23 @@ VALID_CLOSE_STATUS = (
     STATUS_SERVICE_RESTART,
     STATUS_TRY_AGAIN_LATER,
     STATUS_BAD_GATEWAY,
-)
+    )
 
 
 class ABNF:
     """
     ABNF frame class.
-    See http://tools.ietf.org/html/rfc5234
+    see http://tools.ietf.org/html/rfc5234
     and http://tools.ietf.org/html/rfc6455#section-5.2
     """
 
     # operation code values.
-    OPCODE_CONT = 0x0
-    OPCODE_TEXT = 0x1
+    OPCODE_CONT   = 0x0
+    OPCODE_TEXT   = 0x1
     OPCODE_BINARY = 0x2
-    OPCODE_CLOSE = 0x8
-    OPCODE_PING = 0x9
-    OPCODE_PONG = 0xA
+    OPCODE_CLOSE  = 0x8
+    OPCODE_PING   = 0x9
+    OPCODE_PONG   = 0xa
 
     # available operation code value tuple
     OPCODES = (
@@ -136,10 +134,10 @@ class ABNF:
         OPCODE_CLOSE: "close",
         OPCODE_PING: "ping",
         OPCODE_PONG: "pong",
-    }
+        }
 
     # data length threshold.
-    LENGTH_7 = 0x7E
+    LENGTH_7  = 0x7e
     LENGTH_16 = 1 << 16
     LENGTH_63 = 1 << 63
 
@@ -169,7 +167,7 @@ class ABNF:
 
     def validate(self, skip_utf8_validation: bool = False) -> None:
         """
-        Validate the ABNF frame.
+        validate the ABNF frame.
 
         Parameters
         ----------
@@ -199,7 +197,7 @@ class ABNF:
 
     @staticmethod
     def _is_valid_close_status(code: int) -> bool:
-        return code in VALID_CLOSE_STATUS or (3000 <= code < 5000)
+        return code in VALID_CLOSE_STATUS or (3000 <= code <5000)
 
     def __str__(self) -> str:
         return f"fin={self.fin} opcode={self.opcode} data={self.data}"
@@ -207,7 +205,7 @@ class ABNF:
     @staticmethod
     def create_frame(data: Union[bytes, str], opcode: int, fin: int = 1) -> "ABNF":
         """
-        Create frame to send text, binary and other data.
+        create frame to send text, binary and other data.
 
         Parameters
         ----------
@@ -227,7 +225,7 @@ class ABNF:
 
     def format(self) -> bytes:
         """
-        Format this object to string(byte array) to send data to server.
+        format this object to string(byte array) to send data to server.
         """
         if any(x not in (0, 1) for x in [self.fin, self.rsv1, self.rsv2, self.rsv3]):
             raise ValueError("not 0 or 1")
@@ -271,7 +269,7 @@ class ABNF:
     @staticmethod
     def mask(mask_key: Union[str, bytes], data: Union[str, bytes]) -> bytes:
         """
-        Mask or unmask data. Just do xor for each byte
+        mask or unmask data. Just do xor for each byte
 
         Parameters
         ----------
