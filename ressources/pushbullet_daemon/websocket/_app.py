@@ -306,7 +306,7 @@ class WebSocketApp:
 
     def close(self, **kwargs) -> None:
         """
-        Close websocket connection.
+        close websocket connection.
         """
         self.keep_running = False
         if self.sock:
@@ -360,7 +360,7 @@ class WebSocketApp:
         reconnect: int = None,
     ) -> bool:
         """
-        Run event loop for WebSocket framework.
+        run event loop for WebSocket framework.
 
         This loop is an infinite loop and is alive while websocket is available.
 
