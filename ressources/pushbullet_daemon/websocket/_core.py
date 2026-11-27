@@ -352,7 +352,7 @@ class WebSocket:
 
     def ping(self, payload: Union[str, bytes] = ""):
         """
-        Send ping data.
+        send ping data.
 
         Parameters
         ----------
@@ -365,7 +365,7 @@ class WebSocket:
 
     def pong(self, payload: Union[str, bytes] = ""):
         """
-        Send pong data.
+        send pong data.
 
         Parameters
         ----------
@@ -479,7 +479,7 @@ class WebSocket:
 
     def send_close(self, status: int = STATUS_NORMAL, reason: bytes = b""):
         """
-        Send close data to the server.
+        send close data to the server.
 
         Parameters
         ----------
