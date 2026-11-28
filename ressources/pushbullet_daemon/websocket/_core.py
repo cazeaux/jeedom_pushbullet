@@ -185,7 +185,7 @@ def _get_proxy_info(hostname, is_secure, **options):
     try to retrieve proxy host and port from environment if not provided in options.
     result is (proxy_host, proxy_port, proxy_auth).
     proxy_auth is tuple of username and password of proxy authentication information.
-    
+
     hostname: websocket server name.
 
     is_secure:  is the connection secure? (wss)
@@ -486,7 +486,7 @@ class WebSocket(object):
                 self.sock.setsockopt(*opts)
             for opts in self.sockopt:
                 self.sock.setsockopt(*opts)
-            
+
             address = addrinfo[4]
             try:
                 self.sock.connect(address)
@@ -609,7 +609,7 @@ class WebSocket(object):
             r = r.lower()
             if v != r:
                 return False
-        
+
         if subprotocols:
             subproto = headers.get("sec-websocket-protocol", None)
             if not subproto or subproto not in subprotocols:
@@ -783,7 +783,7 @@ class WebSocket(object):
 
                 if frame.fin:
                     self._recving_frames = None
-                
+
                 if frame.fin or self.fire_cont_frame:
                     data = self._cont_data
                     self._cont_data = None

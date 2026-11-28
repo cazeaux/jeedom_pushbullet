@@ -79,6 +79,3 @@ def validate_utf8(utfbytes):
             return False
 
     return True
-
-
-

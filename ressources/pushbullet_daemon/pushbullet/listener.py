@@ -27,7 +27,7 @@ class Listener(Thread, websocket.WebSocketApp):
         self._api_key = api_key
 
         Thread.__init__(self)
-		
+
         websocket.WebSocketApp.__init__(self, WEBSOCKET_URL + self._api_key,
                                         on_open=self.on_open,
                                         on_message=self.on_message,
@@ -68,9 +68,11 @@ class Listener(Thread, websocket.WebSocketApp):
         try:
             json_message = json.loads(message)
             if json_message["type"] != "nop":
-                self.on_push(json_message)
+                if self.on_push:
+                    self.on_push(json_message)
             else:
-                self.on_ping(json_message)
+                if self.on_ping:
+                    self.on_ping(json_message)
         except Exception as e:
             logging.exception(e)
 

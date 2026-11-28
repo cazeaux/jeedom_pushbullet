@@ -1,22 +1,16 @@
 import json
-
 import requests
-
 
 from .device import Device
 from .contact import Contact
 from .filetype import get_file_type
 
-
-
-class PushBullet(object):
-
+class PushBullet:
     DEVICES_URL = "https://api.pushbullet.com/v2/devices"
     CONTACTS_URL = "https://api.pushbullet.com/v2/contacts"
     ME_URL = "https://api.pushbullet.com/v2/users/me"
     PUSH_URL = "https://api.pushbullet.com/v2/pushes"
     UPLOAD_REQUEST_URL = "https://api.pushbullet.com/v2/upload-request"
-
 
     def __init__(self, api_key):
         self.api_key = api_key
@@ -93,7 +87,7 @@ class PushBullet(object):
     def edit_device(self, device, nickname=None, model=None, manufacturer=None):
         data = {"nickname": nickname}
         iden = device.device_iden
-        r = self._session.post("{}/{}".format(self.DEVICES_URL, iden), data=json.dumps(data))
+        r = self._session.post(f"{self.DEVICES_URL}/{iden}", data=json.dumps(data))
         if r.status_code == requests.codes.ok:
             new_device = Device(self, r.json())
             self.devices[self.devices.index(device)] = new_device
@@ -104,8 +98,7 @@ class PushBullet(object):
     def edit_contact(self, contact, name):
         data = {"name": name}
         iden = contact.iden
-        r = self._session.post("{}/{}".format(self.CONTACTS_URL, iden),
-                                data=json.dumps(data))
+        r = self._session.post(f"{self.CONTACTS_URL}/{iden}", data=json.dumps(data))
         if r.status_code == requests.codes.ok:
             new_contact = Contact(self, r.json())
             self.contacts[self.contacts.index(contact)] = new_contact
@@ -115,7 +108,7 @@ class PushBullet(object):
 
     def remove_device(self, device):
         iden = device.device_iden
-        r = self._session.delete("{}/{}".format(self.DEVICES_URL, iden))
+        r = self._session.delete(f"{self.DEVICES_URL}/{iden}")
         if r.status_code == requests.codes.ok:
             self.devices.remove(device)
             return True, r.json()
@@ -124,7 +117,7 @@ class PushBullet(object):
 
     def remove_contact(self, contact):
         iden = contact.iden
-        r = self._session.delete("{}/{}".format(self.CONTACTS_URL, iden))
+        r = self._session.delete(f"{self.CONTACTS_URL}/{iden}")
         if r.status_code == requests.codes.ok:
             self.contacts.remove(contact)
             return True, r.json()
@@ -132,7 +125,7 @@ class PushBullet(object):
             return False, r.json()
 
     def get_pushes(self, modified_after=None, limit=None):
-        data = {"modified_after": modified_after, "limit":limit}
+        data = {"modified_after": modified_after, "limit": limit}
 
         pushes_list = []
         get_more_pushes = True
@@ -151,16 +144,14 @@ class PushBullet(object):
 
     def dismiss_push(self, iden):
         data = {"dismissed": True}
-        r = self._session.post("{}/{}".format(self.PUSH_URL, iden), data=json.dumps(data))
- 
+        r = self._session.post(f"{self.PUSH_URL}/{iden}", data=json.dumps(data))
         if r.status_code == requests.codes.ok:
             return True, r.json()
         else:
-            return False, r.json()  
+            return False, r.json()
 
     def delete_push(self, iden):
-        r = self._session.delete("{}/{}".format(self.PUSH_URL, iden))
- 
+        r = self._session.delete(f"{self.PUSH_URL}/{iden}")
         if r.status_code == requests.codes.ok:
             return True, r.json()
         else:
@@ -177,7 +168,7 @@ class PushBullet(object):
 
         if r.status_code != requests.codes.ok:
             return False, r.json()
-        
+
         upload_data = r.json().get("data")
         file_url = r.json().get("file_url")
         upload_url = r.json().get("upload_url")
@@ -192,9 +183,9 @@ class PushBullet(object):
             data["body"] = body
 
         data.update(PushBullet._recipient(device, contact, email))
-    
+
         return self._push(data)
-    
+
     def push_note(self, title, body, device=None, contact=None, email=None):
         data = {"type": "note", "title": title, "body": body}
 
